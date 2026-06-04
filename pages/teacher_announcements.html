@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>公告 - ScholarLink</title>
+  <script src="auth.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap');
+    :root { --bg:#0f172a; --card:#111827; --surface:#0b1220; --accent:#7dd3fc; --accent-strong:#22d3ee; --text:#e5e7eb; --muted:#9ca3af; --border:#1f2937; --shadow:0 24px 60px rgba(0,0,0,0.35); --radius:14px; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Source Sans 3',system-ui,-apple-system,sans-serif;background:radial-gradient(circle at 20% 20%, rgba(56,189,248,0.06), transparent 25%),radial-gradient(circle at 80% 10%, rgba(14,165,233,0.07), transparent 26%),radial-gradient(circle at 50% 80%, rgba(56,189,248,0.05), transparent 30%),var(--bg);color:var(--text);line-height:1.6}
+    header{position:sticky;top:0;z-index:10;backdrop-filter:blur(12px);background:rgba(15,23,42,0.8);border-bottom:1px solid var(--border)}
+    .nav{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 22px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.5px;font-family:'Space Grotesk',sans-serif}
+    .brand .dot{width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-strong));box-shadow:0 0 18px rgba(125,211,252,0.6)}
+    nav a{color:var(--muted);text-decoration:none;margin-left:18px;font-weight:600;transition:color .2s}
+    nav a:hover{color:var(--accent-strong)}
+    .container{max-width:1200px;margin:0 auto;padding:24px 22px 60px}
+    .card{background:linear-gradient(145deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid var(--border);border-radius:var(--radius);padding:18px 18px 20px;box-shadow:var(--shadow)}
+    .section-title{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+    .announcement-list{display:grid;gap:12px}
+    .announcement-item{padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.02);display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .announcement-meta{color:var(--muted);font-size:13px}
+    .badge{padding:4px 8px;border-radius:8px;font-size:12px;background:rgba(34,211,238,0.15);color:var(--accent-strong)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand"><span class="dot"></span>ScholarLink <span style="font-size:14px;color:var(--accent-strong);margin-left:8px;">教師端</span></div>
+      <nav>
+        <a href="/scholarship/pages/teacher_students.html">學生列表</a>
+        <a href="/scholarship/pages/teacher_recommender.html">推薦信管理</a>
+        <a href="/scholarship/pages/teacher_announcements.html">公告</a>
+        <a href="/scholarship/pages/login.html" onclick="logout();return false;">登出</a>
+      </nav>
+    </div>
+  </header>
+  <div class="container">
+    <section class="card">
+      <div class="section-title">最新公告</div>
+      <div class="announcement-list">
+        <div class="announcement-item">
+          <div>
+            <strong>112-2 學期境外生助學金申請開放</strong>
+            <div class="announcement-meta">申請起：2026/01/05 · 截止：2026/02/05 · 需附境外生證明</div>
+          </div>
+          <span class="badge">申請公告</span>
+        </div>
+        <div class="announcement-item">
+          <div>
+            <strong>導師推薦信填寫提醒</strong>
+            <div class="announcement-meta">請於學生申請截止日前完成推薦信撰寫並送出</div>
+          </div>
+          <span class="badge">提醒</span>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+      checkAuth(['Teacher']);
+    });
+  </script>
+</body>
+</html>

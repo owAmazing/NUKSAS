@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>修改基本資料（本地測試版） - ScholarLink</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap');
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --surface: #0b1220;
+      --accent: #7dd3fc;
+      --accent-strong: #22d3ee;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2937;
+      --shadow: 0 24px 60px rgba(0,0,0,0.35);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(56,189,248,0.06), transparent 25%),
+                  radial-gradient(circle at 80% 10%, rgba(14,165,233,0.07), transparent 26%),
+                  radial-gradient(circle at 50% 80%, rgba(56,189,248,0.05), transparent 30%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(12px);
+      background: rgba(15,23,42,0.8);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 22px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .brand .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      box-shadow: 0 0 18px rgba(125,211,252,0.6);
+    }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      margin-left: 18px;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+    nav a:hover { color: var(--accent-strong); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px 22px 60px; }
+    .card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 18px 20px;
+      box-shadow: var(--shadow);
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(125,211,252,0.15);
+      color: var(--accent-strong);
+      border: 1px solid rgba(125,211,252,0.35);
+    }
+    .hero {
+      margin: 28px 0 10px;
+      padding: 26px;
+      border-radius: 16px;
+      background: linear-gradient(120deg, rgba(14,165,233,0.25), rgba(8,47,73,0.65)),
+                  linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.8));
+      border: 1px solid rgba(125,211,252,0.35);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 12px;
+    }
+    .hero h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; }
+    .hero p { margin: 0; color: var(--muted); max-width: 760px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn {
+      padding: 11px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: 0.2px;
+      transition: all 0.2s ease;
+      display: inline-block;
+      cursor: pointer;
+    }
+    .btn:hover { border-color: var(--accent-strong); color: var(--accent-strong); }
+    .btn.primary { 
+      background: linear-gradient(120deg, var(--accent), var(--accent-strong)); 
+      color: #0b1220; 
+      border: none; 
+      box-shadow: 0 12px 40px rgba(34,211,238,0.28); 
+    }
+    .btn.primary:hover { transform: translateY(-1px); }
+    form { display: grid; gap: 12px; }
+    label { font-weight: 600; color: var(--text); font-size: 14px; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+    }
+    .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; align-items: start; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .success-msg {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      color: #86efac;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    footer { margin-top: 40px; color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0 40px; }
+    @media (max-width: 720px) {
+      .hero h1 { font-size: 24px; }
+      nav a { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand">
+        <span class="dot"></span>ScholarLink 
+        <span style="font-size:14px; color: var(--accent-strong); margin-left:8px;">學生端 (測試版)</span>
+      </div>
+      <nav>
+        <a href="student.html">返回首頁</a>
+        <a href="student_apply.html">線上申請</a>
+        <a href="student_results.html">申請結果</a>
+        <a href="index.html">登出</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <section class="hero">
+      <h1>👤 修改基本資料（本地測試版）</h1>
+      <p>此為測試版本，資料將儲存在瀏覽器本地儲存（LocalStorage）。完整版請安裝 Node.js 和 MySQL 後使用。</p>
+    </section>
+
+    <div class="success-msg" id="successMsg">
+      ✅ 資料已成功儲存！
+    </div>
+
+    <section class="card">
+      <div class="section-title">個人資料編輯 <span class="pill">Local Storage Test</span></div>
+      <div class="split">
+        <form id="studentForm">
+          <div>
+            <label>姓名</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          <div>
+            <label>學號</label>
+            <input type="text" id="studentId" name="studentId" disabled style="opacity:0.6;">
+            <p class="muted">學號無法修改</p>
+          </div>
+          <div>
+            <label>Email</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          <div>
+            <label>聯絡電話（可多筆）</label>
+            <input type="text" id="phone1" name="phone1" placeholder="主要電話" required>
+            <input type="text" id="phone2" name="phone2" placeholder="次要電話（選填）" style="margin-top:8px;">
+          </div>
+          <div>
+            <label>學生身分別</label>
+            <select id="identity" name="identity">
+              <option value="一般生">一般生</option>
+              <option value="低收入戶">低收入戶</option>
+              <option value="身心障礙">身心障礙學生</option>
+              <option value="原住民">原住民學生</option>
+              <option value="僑生">境外學生（僑生/外籍生）</option>
+            </select>
+          </div>
+          <div>
+            <label>主修科系</label>
+            <input type="text" id="major" name="major" required>
+          </div>
+          
+          <!-- 僑生額外資訊 -->
+          <div id="overseasFields" style="display: none;">
+            <hr style="border: 1px solid var(--border); margin: 16px 0;">
+            <div style="color: var(--accent-strong); font-weight: 600; margin-bottom: 12px;">僑生資訊</div>
+            <div>
+              <label>僑生編號</label>
+              <input type="text" id="overseas_id" name="overseas_id">
+            </div>
+            <div>
+              <label>華語文能力證明</label>
+              <input type="text" id="chinese_certify" name="chinese_certify">
+            </div>
+            <div>
+              <label>入境日期</label>
+              <input type="date" id="immigrate_date" name="immigrate_date">
+            </div>
+            <div>
+              <label>護照號碼</label>
+              <input type="text" id="passport_number" name="passport_number">
+            </div>
+          </div>
+
+          <div class="actions">
+            <a class="btn" href="student.html">取消</a>
+            <button class="btn primary" type="submit">儲存變更</button>
+          </div>
+        </form>
+        <div class="card" style="background: rgba(34,211,238,0.06); border-color: rgba(34,211,238,0.4);">
+          <div class="section-title" style="margin-bottom:8px;">💾 測試版說明</div>
+          <p class="muted">• 此為不需資料庫的測試版本</p>
+          <p class="muted">• 資料儲存在瀏覽器 LocalStorage</p>
+          <p class="muted">• 重新整理頁面後資料仍會保留</p>
+          <p class="muted">• 清除瀏覽器資料會重置</p>
+          <hr style="border: 1px solid var(--border); margin: 12px 0;">
+          <div class="section-title" style="margin-bottom:8px; font-size: 16px;">目前儲存的資料</div>
+          <pre id="storagePreview" style="background: var(--surface); padding: 12px; border-radius: 8px; font-size: 12px; overflow-x: auto; color: var(--accent);"></pre>
+          <button class="btn" onclick="clearData()" style="margin-top: 12px; width: 100%;">清除所有資料</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    ScholarLink 學生端 © 2026 · <a href="student.html" style="color:var(--accent-strong); text-decoration:none;">返回首頁</a>
+  </footer>
+
+  <script>
+    // 初始化範例資料
+    const defaultData = {
+      id: 'S001',
+      name: '王小明',
+      email: 'student@example.edu',
+      phone1: '0912345678',
+      phone2: '02-1234-5678',
+      identity: '一般生',
+      major: '資訊工程學系'
+    };
+
+    // 載入資料
+    function loadData() {
+      const savedData = localStorage.getItem('studentProfile');
+      const data = savedData ? JSON.parse(savedData) : defaultData;
+
+      document.getElementById('name').value = data.name || '';
+      document.getElementById('studentId').value = data.id || 'S001';
+      document.getElementById('email').value = data.email || '';
+      document.getElementById('phone1').value = data.phone1 || '';
+      document.getElementById('phone2').value = data.phone2 || '';
+      document.getElementById('identity').value = data.identity || '一般生';
+      document.getElementById('major').value = data.major || '';
+
+      // 僑生資料
+      if (data.overseas_id) {
+        document.getElementById('overseas_id').value = data.overseas_id;
+        document.getElementById('chinese_certify').value = data.chinese_certify || '';
+        document.getElementById('immigrate_date').value = data.immigrate_date || '';
+        document.getElementById('passport_number').value = data.passport_number || '';
+      }
+
+      toggleIdentityFields(data.identity);
+      updateStoragePreview();
+    }
+
+    // 根據身分別切換顯示欄位
+    function toggleIdentityFields(identity) {
+      const overseasFields = document.getElementById('overseasFields');
+      if (identity === '僑生') {
+        overseasFields.style.display = 'block';
+      } else {
+        overseasFields.style.display = 'none';
+      }
+    }
+
+    // 身分別改變時切換欄位
+    document.getElementById('identity').addEventListener('change', (e) => {
+      toggleIdentityFields(e.target.value);
+    });
+
+    // 儲存資料
+    document.getElementById('studentForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const data = {
+        id: document.getElementById('studentId').value,
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone1: formData.get('phone1'),
+        phone2: formData.get('phone2'),
+        identity: formData.get('identity'),
+        major: formData.get('major'),
+        savedAt: new Date().toLocaleString('zh-TW')
+      };
+
+      // 如果是僑生，加入額外資訊
+      if (data.identity === '僑生') {
+        data.overseas_id = formData.get('overseas_id');
+        data.chinese_certify = formData.get('chinese_certify');
+        data.immigrate_date = formData.get('immigrate_date');
+        data.passport_number = formData.get('passport_number');
+      }
+
+      // 儲存到 LocalStorage
+      localStorage.setItem('studentProfile', JSON.stringify(data));
+
+      // 顯示成功訊息
+      const successMsg = document.getElementById('successMsg');
+      successMsg.style.display = 'block';
+      setTimeout(() => {
+        successMsg.style.display = 'none';
+      }, 3000);
+
+      // 更新預覽
+      updateStoragePreview();
+
+      // 捲動到頂部
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // 更新儲存資料預覽
+    function updateStoragePreview() {
+      const savedData = localStorage.getItem('studentProfile');
+      const preview = document.getElementById('storagePreview');
+      if (savedData) {
+        preview.textContent = JSON.stringify(JSON.parse(savedData), null, 2);
+      } else {
+        preview.textContent = '尚無儲存資料';
+      }
+    }
+
+    // 清除資料
+    function clearData() {
+      if (confirm('確定要清除所有儲存的資料嗎？')) {
+        localStorage.removeItem('studentProfile');
+        loadData();
+        alert('資料已清除，已恢復為預設值');
+      }
+    }
+
+    // 頁面載入時執行
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScholarLink 登入</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 400px;
+      width: 100%;
+    }
+    h1 {
+      color: #667eea;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+    .alert {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .alert.error {
+      background: #fee;
+      border: 1px solid #fcc;
+      color: #c33;
+    }
+    .alert.success {
+      background: #efe;
+      border: 1px solid #cfc;
+      color: #3c3;
+    }
+    .demo {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 8px;
+    }
+    .demo h3 {
+      margin-bottom: 10px;
+      color: #667eea;
+      font-size: 16px;
+    }
+    .demo code {
+      background: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: #667eea;
+      cursor: pointer;
+    }
+    .demo code:hover {
+      background: #667eea;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1> ScholarLink</h1>
+    
+    <div class="alert" id="alert"></div>
+    
+    <form onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>使用者 ID</label>
+        <input type="text" id="userId" placeholder="請輸入您的 ID" required>
+      </div>
+      
+      <button type="submit" class="btn">登入</button>
+    </form>
+    
+    <div class="demo">
+      <h3>測試帳號</h3>
+      <p><code onclick="fillUserId('S001')">S001</code> <code onclick="fillUserId('S002')">S002</code> <code onclick="fillUserId('T001')">T001</code> <code onclick="fillUserId('A001')">A001</code></p>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '/scholarship/api/index.php';
+
+    function fillUserId(id) {
+      document.getElementById('userId').value = id;
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      
+      const userId = document.getElementById('userId').value.trim();
+      const alert = document.getElementById('alert');
+      
+      alert.style.display = 'none';
+      
+      try {
+        const response = await fetch(`${API_BASE}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          sessionStorage.setItem('currentUser', JSON.stringify(result.data));
+          
+          alert.className = 'alert success';
+          alert.textContent = `登入成功！歡迎 ${result.data.name}`;
+          alert.style.display = 'block';
+          
+          setTimeout(() => {
+            switch(result.data.type) {
+              case 'Student':
+                window.location.href = 'student_dashboard.html';
+                break;
+              case 'Teacher':
+                window.location.href = 'teacher.html';
+                break;
+              case 'SystemAdministrator':
+                window.location.href = 'admin.html';
+                break;
+              case 'Organization':
+                window.location.href = 'organization.html';
+                break;
+              default:
+                window.location.href = 'student_dashboard.html';
+            }
+          }, 1000);
+        } else {
+          alert.className = 'alert error';
+          alert.textContent = result.message || '登入失敗';
+          alert.style.display = 'block';
+        }
+      } catch (error) {
+        alert.className = 'alert error';
+        alert.textContent = '無法連接伺服器，請確認 XAMPP 已啟動';
+        alert.style.display = 'block';
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>

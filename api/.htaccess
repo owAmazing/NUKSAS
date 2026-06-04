@@ -1,0 +1,9 @@
+RewriteEngine On
+RewriteBase /scholarship/api/
+
+# 如果請求的不是實際存在的文件或目錄
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# 重寫到 index.php
+RewriteRule ^(.*)$ index.php/$1 [L]

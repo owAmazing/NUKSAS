@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network Test</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #0f0; }
+    .test { margin: 10px 0; padding: 10px; background: #2a2a2a; border-radius: 4px; }
+    .success { color: #0f0; }
+    .error { color: #f00; }
+    button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Scholarship System Network Test</h1>
+  
+  <div class="test">
+    <strong>當前 URL:</strong> <span id="currentUrl"></span>
+  </div>
+  
+  <div class="test">
+    <strong>當前 Host:</strong> <span id="currentHost"></span>
+  </div>
+  
+  <div class="test">
+    <strong>當前 Origin:</strong> <span id="currentOrigin"></span>
+  </div>
+  
+  <h2>API 測試</h2>
+  <button onclick="testAbsolutePath()">測試絕對路徑 (/scholarship/api)</button>
+  <button onclick="testRelativePath()">測試相對路徑 (../api)</button>
+  <button onclick="testFullPath()">測試完整路徑 (origin + /scholarship/api)</button>
+  
+  <div id="results" style="margin-top: 20px;"></div>
+  
+  <script>
+    document.getElementById('currentUrl').textContent = window.location.href;
+    document.getElementById('currentHost').textContent = window.location.host;
+    document.getElementById('currentOrigin').textContent = window.location.origin;
+    
+    const resultsDiv = document.getElementById('results');
+    
+    async function testPath(url, label) {
+      resultsDiv.innerHTML += `<div class="test">測試 ${label}: <code>${url}</code> ... `;
+      try {
+        const start = Date.now();
+        const response = await fetch(url);
+        const elapsed = Date.now() - start;
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultsDiv.lastChild.innerHTML += `<span class="success">✓ 成功 (${elapsed}ms)</span><br>回應: ${JSON.stringify(data).substring(0, 100)}...</div>`;
+        } else {
+          resultsDiv.lastChild.innerHTML += `<span class="error">✗ 失敗 HTTP ${response.status}</span></div>`;
+        }
+      } catch (error) {
+        resultsDiv.lastChild.innerHTML += `<span class="error">✗ 錯誤: ${error.message}</span></div>`;
+      }
+    }
+    
+    async function testAbsolutePath() {
+      await testPath('/scholarship/api/user/ADMIN001', '絕對路徑');
+    }
+    
+    async function testRelativePath() {
+      await testPath('../api/user/ADMIN001', '相對路徑');
+    }
+    
+    async function testFullPath() {
+      const fullUrl = `${window.location.origin}/scholarship/api/user/ADMIN001`;
+      await testPath(fullUrl, '完整路徑');
+    }
+  </script>
+</body>
+</html>

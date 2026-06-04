@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>學生列表 - ScholarLink</title>
+  <script src="auth.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap');
+    :root { --bg:#0f172a; --card:#111827; --surface:#0b1220; --accent:#7dd3fc; --accent-strong:#22d3ee; --text:#e5e7eb; --muted:#9ca3af; --border:#1f2937; --shadow:0 24px 60px rgba(0,0,0,0.35); --radius:14px; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Source Sans 3',system-ui,-apple-system,sans-serif;background:radial-gradient(circle at 20% 20%, rgba(56,189,248,0.06), transparent 25%),radial-gradient(circle at 80% 10%, rgba(14,165,233,0.07), transparent 26%),radial-gradient(circle at 50% 80%, rgba(56,189,248,0.05), transparent 30%),var(--bg);color:var(--text);line-height:1.6}
+    header{position:sticky;top:0;z-index:10;backdrop-filter:blur(12px);background:rgba(15,23,42,0.8);border-bottom:1px solid var(--border)}
+    .nav{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 22px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.5px;font-family:'Space Grotesk',sans-serif}
+    .brand .dot{width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-strong));box-shadow:0 0 18px rgba(125,211,252,0.6)}
+    nav a{color:var(--muted);text-decoration:none;margin-left:18px;font-weight:600;transition:color .2s}
+    nav a:hover{color:var(--accent-strong)}
+    .container{max-width:1200px;margin:0 auto;padding:24px 22px 60px}
+    .card{background:linear-gradient(145deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid var(--border);border-radius:var(--radius);padding:18px 18px 20px;box-shadow:var(--shadow)}
+    .section-title{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+    table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:12px}
+    th,td{padding:12px 10px;text-align:left}
+    th{background:rgba(255,255,255,0.04);border-bottom:1px solid var(--border);font-size:13px;letter-spacing:.3px}
+    tr:nth-child(even){background:rgba(255,255,255,0.02)}
+    tr:hover{background:rgba(34,211,238,0.05)}
+    .status{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;display:inline-block}
+    .status.pending{background:rgba(245,158,11,0.18);color:#fbbf24}
+    .status.done{background:rgba(34,197,94,0.18);color:#86efac}
+    .muted{color:var(--muted);font-size:13px}
+    .btn{padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);text-decoration:none;font-weight:700;font-family:'Space Grotesk',sans-serif;letter-spacing:.2px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,0.25);transition:transform .15s ease, box-shadow .2s ease}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 12px 32px rgba(34,211,238,0.22)}
+    .btn.primary{background:linear-gradient(120deg,var(--accent),var(--accent-strong));color:#0b1220;border:none}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand"><span class="dot"></span>ScholarLink <span style="font-size:14px;color:var(--accent-strong);margin-left:8px;">教師端</span></div>
+      <nav>
+        <a href="/scholarship/pages/teacher_students.html">學生列表</a>
+        <a href="/scholarship/pages/teacher_recommender.html">推薦信管理</a>
+        <a href="/scholarship/pages/teacher_announcements.html">公告</a>
+        <a href="/scholarship/pages/login.html" onclick="logout();return false;">登出</a>
+      </nav>
+    </div>
+  </header>
+  <div class="container">
+    <section class="card">
+      <div class="section-title">指導學生申請列表</div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>學生姓名</th>
+              <th>學號</th>
+              <th>申請獎助學金</th>
+              <th>申請日期</th>
+              <th>推薦信狀態</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>王小明</td>
+              <td>A123456789</td>
+              <td>境外學生助學金</td>
+              <td>2026/01/06</td>
+              <td><span class="status pending">待撰寫</span></td>
+              <td><a class="btn primary" href="/scholarship/pages/teacher_recommender.html?student=A123456789&scholarship=%E5%A2%83%E5%A4%96%E5%AD%B8%E7%94%9F%E5%8A%A9%E5%AD%B8%E9%87%91">撰寫推薦</a></td>
+            </tr>
+            <tr>
+              <td>林佳欣</td>
+              <td>A123456790</td>
+              <td>弱勢助學金</td>
+              <td>2026/01/03</td>
+              <td><span class="status pending">待撰寫</span></td>
+              <td><a class="btn primary" href="/scholarship/pages/teacher_recommender.html?student=A123456790&scholarship=%E5%BC%B1%E5%8B%A2%E5%8A%A9%E5%AD%B8%E9%87%91">撰寫推薦</a></td>
+            </tr>
+            <tr>
+              <td>陳大衛</td>
+              <td>A123456791</td>
+              <td>學業成績優異獎學金</td>
+              <td>2025/12/20</td>
+              <td><span class="status done">已送出</span></td>
+              <td><a class="btn" href="/scholarship/pages/teacher_recommender.html?student=A123456791&scholarship=%E5%AD%B8%E6%A5%AD%E6%88%90%E7%B8%BE%E5%84%AA%E7%95%B0%E7%8D%8E%E5%AD%B8%E9%87%91">檢視內容</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:16px;">
+        <p class="muted">💡 提示：學生提交申請後若選填您為推薦人，系統會自動發送通知。請於截止日前完成推薦信撰寫。</p>
+      </div>
+    </section>
+  </div>
+  <script>
+    const API_BASE = '/scholarship/api';
+    
+    async function init(){
+      const user = checkAuth(['Teacher']);
+      if(!user) return;
+      
+      try{
+        const res = await fetch(`${API_BASE}/teacher/${user.id}/applications`);
+        const result = await res.json();
+        const tbody = document.querySelector('tbody');
+        
+        if(!result.success || !Array.isArray(result.data)){
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">載入失敗</td></tr>';
+          return;
+        }
+        
+        if(result.data.length === 0){
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">目前沒有學生申請需要推薦</td></tr>';
+          return;
+        }
+        
+        tbody.innerHTML = result.data.map(app=>{
+          const hasRec = app.recommendation_id ? true : false;
+          const statusClass = hasRec ? 'done' : 'pending';
+          const statusText = hasRec ? '已送出' : '待撰寫';
+          const btnClass = hasRec ? 'btn' : 'btn primary';
+          const btnText = hasRec ? '檢視內容' : '撰寫推薦';
+          const date = app.apply_date ? new Date(app.apply_date).toLocaleDateString('zh-TW') : '-';
+          
+          return `<tr>
+            <td>${app.student_name}</td>
+            <td>${app.student_id}</td>
+            <td>${app.scholarship_name}</td>
+            <td>${date}</td>
+            <td><span class="status ${statusClass}">${statusText}</span></td>
+            <td><a class="${btnClass}" href="/scholarship/pages/teacher_recommender.html?student=${encodeURIComponent(app.student_id)}&scholarship=${encodeURIComponent(app.scholarship_name || '')}">${btnText}</a></td>
+          </tr>`;
+        }).join('');
+      }catch(e){
+        console.error('載入失敗:', e);
+        document.querySelector('tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">載入失敗</td></tr>';
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

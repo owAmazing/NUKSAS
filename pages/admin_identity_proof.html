@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>身分文件管理 - ScholarLink</title>
+  <script src="../auth.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap');
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --surface: #0b1220;
+      --accent: #7dd3fc;
+      --accent-strong: #22d3ee;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2937;
+      --shadow: 0 24px 60px rgba(0,0,0,0.35);
+      --radius: 14px;
+      --success: #22c55e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(56,189,248,0.06), transparent 25%),
+                  radial-gradient(circle at 80% 10%, rgba(14,165,233,0.07), transparent 26%),
+                  radial-gradient(circle at 50% 80%, rgba(56,189,248,0.05), transparent 30%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(12px);
+      background: rgba(15,23,42,0.8);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 22px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .brand .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      box-shadow: 0 0 18px rgba(125,211,252,0.6);
+    }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      margin-left: 18px;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+    nav a:hover { color: var(--accent-strong); }
+    .container { max-width: 1400px; margin: 0 auto; padding: 24px 22px 60px; }
+    .card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 16px;
+    }
+    .hero {
+      margin: 0 0 20px;
+      padding: 26px;
+      border-radius: 16px;
+      background: linear-gradient(120deg, rgba(14,165,233,0.25), rgba(8,47,73,0.65)),
+                  linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.8));
+      border: 1px solid rgba(125,211,252,0.35);
+      box-shadow: var(--shadow);
+    }
+    .hero h1 { margin: 0; font-size: 28px; }
+    .hero p { margin: 8px 0 0; color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: rgba(255,255,255,0.04); font-weight: 700; font-size: 13px; }
+    tr:hover { background: rgba(34,211,238,0.05); }
+    .btn {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-block;
+    }
+    .btn:hover { border-color: var(--accent-strong); color: var(--accent-strong); }
+    .btn.success { background: rgba(34,197,94,0.15); color: var(--success); border-color: rgba(34,197,94,0.3); }
+    .loading { text-align: center; padding: 40px; color: var(--muted); }
+    .badge {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .badge.general { background: rgba(107,114,128,0.2); color: #d1d5db; }
+    .badge.special { background: rgba(34,211,238,0.2); color: var(--accent-strong); }
+    footer { margin-top: 40px; color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand"><span class="dot"></span>ScholarLink <span style="font-size:14px; color: var(--accent-strong); margin-left:8px;">系統管理員</span></div>
+      <nav>
+        <a href="admin_scholarships.html">獎助管理</a>
+        <a href="admin_announcements.html">公告管理</a>
+        <a href="admin_identity_proof.html">身分文件管理</a>
+        <a href="admin_accounts.html">帳號管理</a>
+        <a href="/scholarship/pages/login.html" onclick="logout(); return false;">登出</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <section class="hero">
+      <h1>📄 身分文件管理</h1>
+      <p>檢視和下載學生上傳的身分證明文件（低收証明、身障手冊、僑生居留證等）</p>
+    </section>
+
+    <section class="card">
+      <div class="section-title">所有學生的身分文件</div>
+      <div style="overflow-x:auto;">
+        <table id="proofTable">
+          <thead>
+            <tr>
+              <th>學號</th>
+              <th>學生名稱</th>
+              <th>身份別</th>
+              <th>檔案名稱</th>
+              <th>檔案大小</th>
+              <th>上傳時間</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="proofTableBody">
+            <tr>
+              <td colspan="7" style="text-align:center; padding:40px; color: var(--muted);">載入中...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    ScholarLink 系統管理員端 © 2026
+  </footer>
+
+  <script>
+    const API_BASE = '/scholarship/api';
+    let currentUser = null;
+
+    // 檢查認證
+    currentUser = checkAuth(['SystemAdministrator']);
+    if (!currentUser) {
+      throw new Error('Unauthorized');
+    }
+
+    // 載入身分證明文件列表
+    async function loadIdentityProofs() {
+      try {
+        const response = await fetch(`${API_BASE}/identity-proof`);
+        const result = await response.json();
+
+        if (!result.success) {
+          showError('無法載入文件列表');
+          return;
+        }
+
+        displayProofs(result.data || []);
+      } catch (error) {
+        console.error('Error:', error);
+        showError('載入失敗');
+      }
+    }
+
+    // 顯示檔案列表
+    function displayProofs(proofs) {
+      const tbody = document.getElementById('proofTableBody');
+
+      if (proofs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--muted); padding:20px;">目前沒有上傳的身分證明文件</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = proofs.map(p => {
+        const uploadDate = new Date(p.uploaded_at).toLocaleDateString('zh-TW');
+        const fileSizeKB = (p.file_size / 1024).toFixed(1);
+        const badgeClass = p.identity === '一般生' ? 'general' : 'special';
+        
+        return `
+          <tr>
+            <td>${p.student_id}</td>
+            <td>${p.student_name}</td>
+            <td><span class="badge ${badgeClass}">${p.identity}</span></td>
+            <td>${p.file_name}</td>
+            <td>${fileSizeKB} KB</td>
+            <td>${uploadDate}</td>
+            <td>
+              <a class="btn success" href="${p.file_path}" download>下載</a>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 顯示錯誤
+    function showError(message) {
+      const tbody = document.getElementById('proofTableBody');
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: #f87171; padding:20px;">${message}</td></tr>`;
+    }
+
+    // 頁面載入完成後執行
+    document.addEventListener('DOMContentLoaded', () => {
+      loadIdentityProofs();
+    });
+  </script>
+</body>
+</html>

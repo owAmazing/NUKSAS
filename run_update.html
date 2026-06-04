@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>執行 SQL 更新</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .success { color: green; }
+        .error { color: red; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>資料庫更新工具</h1>
+        <p>點擊下方按鈕執行 SQL 更新，添加獎學金發放功能所需的欄位。</p>
+        
+        <button onclick="executeUpdate()">執行更新</button>
+        
+        <div id="result" style="margin-top: 20px;"></div>
+    </div>
+    
+    <script>
+        async function executeUpdate() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>執行中...</p>';
+            
+            try {
+                const response = await fetch('execute_sql.php', {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <h3 class="success">✓ 更新成功！</h3>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                        <p><a href="admin_scholarships.html">前往獎學金管理</a></p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <h3 class="error">✗ 更新失敗</h3>
+                        <p>${result.message}</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3 class="error">✗ 執行錯誤</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>獎學金發放機構端 - ScholarLink</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap');
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --surface: #0b1220;
+      --accent: #7dd3fc;
+      --accent-strong: #22d3ee;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --warn: #f59e0b;
+      --success: #22c55e;
+      --danger: #f43f5e;
+      --border: #1f2937;
+      --shadow: 0 24px 60px rgba(0,0,0,0.35);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(56,189,248,0.06), transparent 25%),
+                  radial-gradient(circle at 80% 10%, rgba(14,165,233,0.07), transparent 26%),
+                  radial-gradient(circle at 50% 80%, rgba(56,189,248,0.05), transparent 30%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(12px);
+      background: rgba(15,23,42,0.8);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 22px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .brand .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      box-shadow: 0 0 18px rgba(125,211,252,0.6);
+    }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      margin-left: 18px;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+    nav a:hover { color: var(--accent-strong); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px 22px 60px; }
+    .grid { display: grid; gap: 18px; }
+    .card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 18px 20px;
+      box-shadow: var(--shadow);
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(125,211,252,0.15);
+      color: var(--accent-strong);
+      border: 1px solid rgba(125,211,252,0.35);
+    }
+    .hero {
+      margin: 28px 0 10px;
+      padding: 26px;
+      border-radius: 16px;
+      background: linear-gradient(120deg, rgba(14,165,233,0.25), rgba(8,47,73,0.65)),
+                  linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.8));
+      border: 1px solid rgba(125,211,252,0.35);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 12px;
+    }
+    .hero h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; }
+    .hero p { margin: 0; color: var(--muted); max-width: 760px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn {
+      padding: 11px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: 0.2px;
+      transition: all 0.2s ease;
+      display: inline-block;
+    }
+    .btn:hover { border-color: var(--accent-strong); color: var(--accent-strong); }
+    .btn.primary { background: linear-gradient(120deg, var(--accent), var(--accent-strong)); color: #0b1220; border: none; box-shadow: 0 12px 40px rgba(34,211,238,0.28); }
+    .btn.primary:hover { transform: translateY(-1px); }
+    .announcement-list { display: grid; gap: 12px; }
+    .announcement-item {
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .announcement-item strong { color: var(--text); }
+    .announcement-meta { color: var(--muted); font-size: 13px; }
+    .badge { padding: 4px 8px; border-radius: 8px; font-size: 12px; background: rgba(34,211,238,0.15); color: var(--accent-strong); }
+    form { display: grid; gap: 12px; }
+    label { font-weight: 600; color: var(--text); font-size: 14px; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 12px; }
+    th, td { padding: 12px 10px; text-align: left; }
+    th { background: rgba(255,255,255,0.04); border-bottom: 1px solid var(--border); font-size: 13px; letter-spacing: 0.3px; }
+    tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+    tr:hover { background: rgba(34,211,238,0.05); }
+    .status { padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; display: inline-block; }
+    .status.pending { background: rgba(245,158,11,0.18); color: #fbbf24; }
+    .status.review { background: rgba(59,130,246,0.18); color: #93c5fd; }
+    .status.needDoc { background: rgba(244,63,94,0.18); color: #fecdd3; }
+    .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; align-items: start; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .stat-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+    }
+    .stat-num { font-size: 32px; font-weight: 700; color: var(--accent-strong); margin: 8px 0; }
+    .stat-label { color: var(--muted); font-size: 13px; }
+    footer { margin-top: 40px; color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0 40px; }
+    @media (max-width: 720px) {
+      .hero h1 { font-size: 24px; }
+      nav a { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand"><span class="dot"></span>ScholarLink <span style="font-size:14px; color: var(--accent-strong); margin-left:8px;">獎學金發放機構端</span></div>
+      <nav>
+        <a href="#applications">待審申請</a>
+        <a href="#review">審查作業</a>
+        <a href="#announcements">公告</a>
+        <a href="index.html">登出</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <section class="hero">
+      <h1>🏛️ 獎學金審查管理系統</h1>
+      <p>國際事務處，您好！在這裡可以審核學生申請資料、核定結果、發布審查公告。</p>
+    </section>
+
+    <section class="stats">
+      <div class="stat-card">
+        <div class="stat-label">待審核</div>
+        <div class="stat-num">12</div>
+        <div class="muted">筆申請</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">補件中</div>
+        <div class="stat-num">5</div>
+        <div class="muted">筆申請</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">本月通過</div>
+        <div class="stat-num">28</div>
+        <div class="muted">筆申請</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">總核定金額</div>
+        <div class="stat-num">$820K</div>
+        <div class="muted">本月</div>
+      </div>
+    </section>
+
+    <section id="announcements" class="card">
+      <div class="section-title">最新公告 <span class="pill">Announcement</span></div>
+      <div class="announcement-list">
+        <div class="announcement-item">
+          <div>
+            <strong>112-2 學期境外生助學金申請開放</strong>
+            <div class="announcement-meta">申請起：2026/01/05 · 截止：2026/02/05 · 預計審查 45 件</div>
+          </div>
+          <span class="badge">申請公告</span>
+        </div>
+        <div class="announcement-item">
+          <div>
+            <strong>審查委員會議通知</strong>
+            <div class="announcement-meta">會議時間：2026/02/10 14:00 · 地點：行政大樓 3F 會議室</div>
+          </div>
+          <span class="badge">內部通知</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="applications" class="card">
+      <div class="section-title">待審核申請列表 <span class="pill">apply data / pass</span></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>申請編號</th>
+              <th>學生</th>
+              <th>獎助學金</th>
+              <th>送出日期</th>
+              <th>GPA</th>
+              <th>狀態</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>#2026-001</td>
+              <td>王小明<br><span class="muted">A123456789</span></td>
+              <td>境外學生助學金</td>
+              <td>2026/01/06</td>
+              <td>3.8</td>
+              <td><span class="status pending">待審</span></td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#review">開始審查</a></td>
+            </tr>
+            <tr>
+              <td>#2026-002</td>
+              <td>林佳欣<br><span class="muted">A123456790</span></td>
+              <td>弱勢助學金</td>
+              <td>2026/01/03</td>
+              <td>3.5</td>
+              <td><span class="status needDoc">缺件</span></td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#">通知補件</a></td>
+            </tr>
+            <tr>
+              <td>#2026-003</td>
+              <td>陳大衛<br><span class="muted">A123456791</span></td>
+              <td>境外學生助學金</td>
+              <td>2026/01/07</td>
+              <td>3.9</td>
+              <td><span class="status review">審查中</span></td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#review">繼續審查</a></td>
+            </tr>
+            <tr>
+              <td>#2026-004</td>
+              <td>李美玲<br><span class="muted">A123456792</span></td>
+              <td>境外學生助學金</td>
+              <td>2026/01/08</td>
+              <td>3.7</td>
+              <td><span class="status pending">待審</span></td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#review">開始審查</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:16px;">
+        <p class="muted">💡 提示：點擊「開始審查」進入審查頁面，查看完整申請資料與推薦信。可批次下載附件進行離線審查。</p>
+      </div>
+    </section>
+
+    <section id="review" class="card">
+      <div class="section-title">審查作業 <span class="pill">pass / organization</span></div>
+      <div class="split">
+        <div class="card" style="background: rgba(255,255,255,0.02);">
+          <h4 style="margin:0 0 10px;">申請資料摘要</h4>
+          <div class="announcement-item" style="margin-bottom:10px;">
+            <div>
+              <strong>王小明 · 境外學生助學金</strong>
+              <div class="announcement-meta">學號：A123456789 · 科系：資訊工程學系</div>
+              <div class="announcement-meta">GPA: 3.8 · 操行：88 · 班排名：15/50</div>
+              <div class="announcement-meta">身分：境外學生（僑生）· 已附證明文件</div>
+            </div>
+            <span class="badge">文件齊全</span>
+          </div>
+          <div style="margin-top:16px;">
+            <p class="muted"><strong>推薦信</strong></p>
+            <p class="muted">張老師（強烈推薦）：該生學習認真、成績優異，積極參與課外活動，具備良好品德...</p>
+            <a class="btn" style="padding:6px 12px; font-size:12px; margin-top:8px;" href="#">查看完整推薦</a>
+          </div>
+          <div style="margin-top:16px;">
+            <p class="muted"><strong>附件下載</strong></p>
+            <div class="actions">
+              <a class="btn" style="padding:6px 12px; font-size:12px;" href="#">成績單.pdf</a>
+              <a class="btn" style="padding:6px 12px; font-size:12px;" href="#">境外證明.pdf</a>
+              <a class="btn" style="padding:6px 12px; font-size:12px;" href="#">中文檢定.pdf</a>
+            </div>
+          </div>
+        </div>
+        <form>
+          <div>
+            <label>審查結果</label>
+            <select>
+              <option value="">請選擇</option>
+              <option>通過</option>
+              <option>不通過</option>
+              <option>要求補件</option>
+            </select>
+          </div>
+          <div>
+            <label>核定金額</label>
+            <input type="number" placeholder="原申請金額 $30,000" value="30000">
+            <p class="muted">可調整核定金額，或維持原申請額度</p>
+          </div>
+          <div>
+            <label>審查意見</label>
+            <textarea placeholder="填寫審查理由、核定依據、補件說明等"></textarea>
+          </div>
+          <div>
+            <label>補件要求（若選擇補件）</label>
+            <textarea placeholder="請詳細說明缺少哪些文件或需補充哪些資料"></textarea>
+          </div>
+          <div>
+            <label>審查人員</label>
+            <input type="text" value="國際事務處 - 審查員" disabled style="opacity:0.6;">
+          </div>
+          <div class="actions">
+            <button class="btn" type="button">暫存</button>
+            <button class="btn primary" type="submit">送出審查結果</button>
+          </div>
+          <p class="muted" style="margin-top:12px;">⚠️ 送出後將產生 Result announce 草稿並自動通知學生，pass 表更新。請確認審查結果無誤。</p>
+        </form>
+      </div>
+    </section>
+
+    <section id="history" class="card">
+      <div class="section-title">審查歷史記錄 <span class="pill">History</span></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>申請編號</th>
+              <th>學生</th>
+              <th>獎助學金</th>
+              <th>審查日期</th>
+              <th>結果</th>
+              <th>核定金額</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>#2025-112</td>
+              <td>陳大明</td>
+              <td>境外學生助學金</td>
+              <td>2025/12/20</td>
+              <td>通過</td>
+              <td>$30,000</td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#">檢視</a></td>
+            </tr>
+            <tr>
+              <td>#2025-111</td>
+              <td>李曉華</td>
+              <td>境外學生助學金</td>
+              <td>2025/12/19</td>
+              <td>通過</td>
+              <td>$30,000</td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#">檢視</a></td>
+            </tr>
+            <tr>
+              <td>#2025-110</td>
+              <td>黃志強</td>
+              <td>境外學生助學金</td>
+              <td>2025/12/18</td>
+              <td>不通過</td>
+              <td>$0</td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#">檢視</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    ScholarLink 獎學金發放機構端 © 2026 · <a href="index.html" style="color:var(--accent-strong); text-decoration:none;">返回登入頁</a>
+  </footer>
+</body>
+</html>

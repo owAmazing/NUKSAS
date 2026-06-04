@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>審查作業 - ScholarLink</title>
+  <script src="auth.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap');
+    :root { --bg:#0f172a; --card:#111827; --surface:#0b1220; --accent:#7dd3fc; --accent-strong:#22d3ee; --text:#e5e7eb; --muted:#9ca3af; --border:#1f2937; --shadow:0 24px 60px rgba(0,0,0,0.35); --radius:14px; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Source Sans 3',system-ui,-apple-system,sans-serif;background:radial-gradient(circle at 20% 20%, rgba(56,189,248,0.06), transparent 25%),radial-gradient(circle at 80% 10%, rgba(14,165,233,0.07), transparent 26%),radial-gradient(circle at 50% 80%, rgba(56,189,248,0.05), transparent 30%),var(--bg);color:var(--text);line-height:1.6}
+    header{position:sticky;top:0;z-index:10;backdrop-filter:blur(12px);background:rgba(15,23,42,0.8);border-bottom:1px solid var(--border)}
+    .nav{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 22px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.5px;font-family:'Space Grotesk',sans-serif}
+    .brand .dot{width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-strong));box-shadow:0 0 18px rgba(125,211,252,0.6)}
+    nav a{color:var(--muted);text-decoration:none;margin-left:18px;font-weight:600;transition:color .2s}
+    nav a:hover{color:var(--accent-strong)}
+    .container{max-width:1200px;margin:0 auto;padding:24px 22px 60px}
+    .grid{display:grid;gap:18px}
+    .card{background:linear-gradient(145deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid var(--border);border-radius:var(--radius);padding:18px 18px 20px;box-shadow:var(--shadow)}
+    .section-title{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+    .announcement-item{padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.02);display:flex;justify-content:space-between;align-items:center;gap:10px}
+    form{display:grid;gap:12px}
+    label{font-weight:600;color:var(--text);font-size:14px}
+    input,select,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px}
+    .actions{display:flex;gap:12px}
+    .btn{padding:11px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);text-decoration:none;font-weight:700;font-family:'Space Grotesk',sans-serif;letter-spacing:.2px}
+    .btn.primary{background:linear-gradient(120deg,var(--accent),var(--accent-strong));color:#0b1220;border:none}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand"><span class="dot"></span>ScholarLink <span style="font-size:14px;color:var(--accent-strong);margin-left:8px;">發放機構端</span></div>
+      <nav>
+        <a href="/scholarship/pages/organization_applications.html">待審申請</a>
+        <a href="/scholarship/pages/organization_review.html">審查作業</a>
+        <a href="/scholarship/pages/organization_announcements.html">公告</a>
+        <a href="/scholarship/pages/login.html" onclick="logout();return false;">登出</a>
+      </nav>
+    </div>
+  </header>
+  <div class="container">
+    <section class="grid">
+      <div class="card">
+        <h4 style="margin:0 0 10px;">申請資料摘要</h4>
+        <div id="summary" class="announcement-item">載入中...</div>
+      </div>
+      
+      <div class="card" id="recommendationCard" style="display:none;">
+        <h4 style="margin:0 0 10px;">教師推薦信</h4>
+        <div style="background:rgba(34,211,238,0.06);border:1px solid rgba(34,211,238,0.2);border-radius:10px;padding:14px;">
+          <p class="muted" style="margin:0 0 8px;"><strong id="teacherName">教師姓名</strong> · <span id="recommendDate" style="font-size:12px;">日期</span></p>
+          <div id="recommendContent" style="color:var(--text);line-height:1.7;white-space:pre-wrap;"></div>
+        </div>
+      </div>
+      
+      <form class="card" id="reviewForm">
+        <input type="hidden" id="applicationId" />
+        <div>
+          <label>審查結果</label>
+          <select id="decision" required>
+            <option value="">請選擇</option>
+            <option value="Approved">通過</option>
+            <option value="Rejected">不通過</option>
+          </select>
+        </div>
+        <div>
+          <label>審查意見</label>
+          <textarea id="comment" placeholder="填寫審查理由、補件說明等"></textarea>
+        </div>
+        <div class="actions">
+          <button class="btn" type="button" onclick="resetForm()">重置</button>
+          <button class="btn primary" type="submit">送出審查結果</button>
+        </div>
+      </form>
+    </section>
+  </div>
+  <script>
+    const API_BASE = '/scholarship/api';
+    function getParam(name){ const u=new URL(location.href); return u.searchParams.get(name); }
+    async function init(){
+      const user = checkAuth(['Organization']); if(!user) return;
+      const id = getParam('id');
+      if(!id){ document.getElementById('summary').textContent='未指定申請'; return; }
+      document.getElementById('applicationId').value = id;
+      try{
+        const res = await fetch(`${API_BASE}/application/${id}`);
+        const result = await res.json();
+        if(!result.success){ document.getElementById('summary').textContent = '找不到申請'; return; }
+        const a = result.data;
+        document.getElementById('summary').innerHTML = `
+          <div>
+            <strong>${a.student_name||'未知'} · ${a.scholarship_name}</strong>
+            <div class="announcement-item-meta">學號：${a.student_id} · 申請編號：${a.id}</div>
+            <div class="announcement-item-meta">GPA: ${a.gpa||'-'} · 成績：${a.score||'-'}</div>
+          </div>`;
+        
+        // 顯示推薦信（如果有）
+        if(a.recommendation_content){
+          document.getElementById('recommendationCard').style.display = 'block';
+          document.getElementById('teacherName').textContent = a.teacher_name || '教師';
+          document.getElementById('recommendDate').textContent = a.recommendation_date ? new Date(a.recommendation_date).toLocaleDateString('zh-TW') : '';
+          document.getElementById('recommendContent').textContent = a.recommendation_content;
+          
+          // 檔案上傳功能已移除
+        }
+      }catch(e){ document.getElementById('summary').textContent='載入失敗'; }
+
+      document.getElementById('reviewForm').addEventListener('submit', submitReview);
+    }
+    async function submitReview(e){
+      e.preventDefault();
+      const id = document.getElementById('applicationId').value;
+      const user = checkAuth(['Organization']); if(!user) return;
+      const apply_state = document.getElementById('decision').value;
+      if(!apply_state){ alert('請選擇審查結果'); return; }
+      const payload = { apply_state };
+      const res = await fetch(`${API_BASE}/application/${id}/review`, { method:'POST', headers:{'Content-Type':'application/json','X-HTTP-Method-Override':'PUT'}, body: JSON.stringify(payload)});
+      const result = await res.json();
+      if(result.success){
+        alert('已更新');
+        location.href = '/scholarship/pages/organization_applications.html';
+      }else{
+        alert('更新失敗: '+result.message);
+      }
+    }
+    function resetForm(){ document.getElementById('reviewForm').reset(); }
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

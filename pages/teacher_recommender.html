@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>推薦信管理 - ScholarLink</title>
+  <script src="auth.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap');
+    :root { --bg:#0f172a; --card:#111827; --surface:#0b1220; --accent:#7dd3fc; --accent-strong:#22d3ee; --text:#e5e7eb; --muted:#9ca3af; --border:#1f2937; --shadow:0 24px 60px rgba(0,0,0,0.35); --radius:14px; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Source Sans 3',system-ui,-apple-system,sans-serif;background:radial-gradient(circle at 20% 20%, rgba(56,189,248,0.06), transparent 25%),radial-gradient(circle at 80% 10%, rgba(14,165,233,0.07), transparent 26%),radial-gradient(circle at 50% 80%, rgba(56,189,248,0.05), transparent 30%),var(--bg);color:var(--text);line-height:1.6}
+    header{position:sticky;top:0;z-index:10;backdrop-filter:blur(12px);background:rgba(15,23,42,0.8);border-bottom:1px solid var(--border)}
+    .nav{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 22px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.5px;font-family:'Space Grotesk',sans-serif}
+    .brand .dot{width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-strong));box-shadow:0 0 18px rgba(125,211,252,0.6)}
+    nav a{color:var(--muted);text-decoration:none;margin-left:18px;font-weight:600;transition:color .2s}
+    nav a:hover{color:var(--accent-strong)}
+    .container{max-width:1200px;margin:0 auto;padding:24px 22px 60px}
+    .card{background:linear-gradient(145deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid var(--border);border-radius:var(--radius);padding:18px 18px 20px;box-shadow:var(--shadow)}
+    .section-title{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+    .split{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;align-items:start}
+    form{display:grid;gap:12px}
+    label{font-weight:600;color:var(--text);font-size:14px}
+    input,select,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px}
+    textarea{min-height:110px;resize:vertical}
+    .actions{display:flex;gap:12px}
+    .btn{padding:11px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);text-decoration:none;font-weight:700;font-family:'Space Grotesk',sans-serif;letter-spacing:.2px;transition:all .2s}
+    .btn:hover{border-color:var(--accent-strong);color:var(--accent-strong)}
+    .btn.primary{background:linear-gradient(120deg,var(--accent),var(--accent-strong));color:#0b1220;border:none;box-shadow:0 12px 40px rgba(34,211,238,0.28)}
+    .btn.primary:hover{transform:translateY(-1px)}
+    .muted{color:var(--muted);font-size:13px}
+    table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:12px}
+    th,td{padding:12px 10px;text-align:left}
+    th{background:rgba(255,255,255,0.04);border-bottom:1px solid var(--border);font-size:13px;letter-spacing:.3px}
+    tr:nth-child(even){background:rgba(255,255,255,0.02)}
+    tr:hover{background:rgba(34,211,238,0.05)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand"><span class="dot"></span>ScholarLink <span style="font-size:14px;color:var(--accent-strong);margin-left:8px;">教師端</span></div>
+      <nav>
+        <a href="/scholarship/pages/teacher_students.html">學生列表</a>
+        <a href="/scholarship/pages/teacher_recommender.html">推薦信管理</a>
+        <a href="/scholarship/pages/teacher_announcements.html">公告</a>
+        <a href="/scholarship/pages/login.html" onclick="logout();return false;">登出</a>
+      </nav>
+    </div>
+  </header>
+  <div class="container">
+    <section class="card">
+      <div class="section-title">撰寫/編輯推薦信</div>
+      <div class="split">
+        <div>
+          <h3 style="margin:0 0 12px;font-size:18px;">推薦信功能說明</h3>
+          <ul class="muted" style="padding-left:18px;margin:10px 0 16px;line-height:1.6;">
+            <li>查詢指導學生列表與申請資料</li>
+            <li>線上輸入推薦內容或上傳 PDF 檔案</li>
+            <li>允許重新編輯直到正式提交</li>
+            <li>送出後狀態同步到 apply data 並鎖定</li>
+            <li>推薦信將作為審查單位的重要參考</li>
+          </ul>
+          <div id="studentInfo" class="card" style="background:rgba(34,211,238,0.06);border-color:rgba(34,211,238,0.4);margin-top:16px;">
+            <p class="muted" style="margin:0;"><strong>學生基本資訊</strong></p>
+            <p class="muted" style="margin:8px 0 0;">尚未載入學生資料</p>
+          </div>
+        </div>
+        <form id="recommendationForm">
+          <div>
+            <label>選擇學生</label>
+            <select id="studentSelect">
+              <option>載入中...</option>
+            </select>
+          </div>
+          <div>
+            <label>推薦內容</label>
+            <textarea id="content" placeholder="請輸入對學生之觀察、學習表現、品行操守、特殊需求等說明，協助審查單位了解學生狀況"></textarea>
+          </div>
+          
+          <div>
+            <label>推薦強度</label>
+            <select id="strength">
+              <option>強烈推薦</option>
+              <option selected>推薦</option>
+              <option>保留推薦</option>
+            </select>
+          </div>
+          <div class="actions">
+            <button class="btn" type="button" onclick="location.reload()">重新載入</button>
+            <button class="btn primary" type="submit">送出推薦信</button>
+          </div>
+          <p class="muted" style="margin-top:12px;">⚠️ 送出後將無法修改，請確認內容無誤。推薦信將直接送交審查單位並通知學生。</p>
+        </form>
+      </div>
+    </section>
+
+  </div>
+  <script>
+    const API_BASE = '/scholarship/api';
+    let applications = [];
+    
+    async function init(){
+      const user = checkAuth(['Teacher']);
+      if(!user) return;
+
+      // 取得 URL 指定的學生學號（若從學生列表點進來）
+      const params = new URLSearchParams(location.search);
+      const targetStudentId = params.get('student');
+      const targetScholarship = params.get('scholarship');
+      
+      // 加載待寫推薦信的申請列表
+      try{
+        const res = await fetch(`${API_BASE}/teacher/${user.id}/applications`);
+        const result = await res.json();
+        if(result.success && Array.isArray(result.data)){
+          applications = result.data;
+          updateStudentSelect(targetStudentId, targetScholarship);
+        }
+      }catch(e){
+        console.error('載入申請列表失敗:', e);
+      }
+      
+      // 處理表單提交
+      document.querySelector('form').addEventListener('submit', submitRecommendation);
+      document.getElementById('studentSelect').addEventListener('change', (e)=>{
+        const idx = e.target.selectedIndex;
+        if(idx >= 0) loadStudentInfo(idx);
+      });
+    }
+    
+    function updateStudentSelect(targetStudentId, targetScholarship){
+      const select = document.getElementById('studentSelect');
+      if(applications.length === 0){
+        select.innerHTML = '<option>目前沒有待寫推薦信的申請</option>';
+        select.disabled = true;
+        const infoDiv = document.getElementById('studentInfo');
+        infoDiv.innerHTML = '<p class="muted" style="margin:0;"><strong>學生基本資訊</strong></p><p class="muted" style="margin:8px 0 0;">目前沒有待寫推薦信的學生</p>';
+        return;
+      }
+      select.innerHTML = applications.map((app, idx)=>{
+        const status = app.recommendation_id ? '已撰寫' : '待撰寫';
+        return `<option value="${idx}">${app.student_name}（${app.scholarship_name}）- ${status}</option>`;
+      }).join('');
+
+      // 切換選擇時載入對應學生資訊
+      select.onchange = () => {
+        loadStudentInfo(select.selectedIndex);
+      };
+
+      // 預設選中第一筆，若 URL 指定學生則定位到該筆
+      let defaultIdx = 0;
+      if (targetStudentId) {
+        // 先嘗試同時匹配學生與獎學金名稱
+        if (targetScholarship) {
+          const bothIdx = applications.findIndex(app => app.student_id === targetStudentId && app.scholarship_name === targetScholarship);
+          if (bothIdx >= 0) defaultIdx = bothIdx;
+          else {
+            const studentOnlyIdx = applications.findIndex(app => app.student_id === targetStudentId);
+            if (studentOnlyIdx >= 0) defaultIdx = studentOnlyIdx;
+          }
+        } else {
+          const studentOnlyIdx = applications.findIndex(app => app.student_id === targetStudentId);
+          if (studentOnlyIdx >= 0) defaultIdx = studentOnlyIdx;
+        }
+      }
+      select.selectedIndex = defaultIdx;
+      loadStudentInfo(defaultIdx);
+    }
+    
+    function loadStudentInfo(idx){
+      if(!applications[idx]) return;
+      const app = applications[idx];
+      const infoDiv = document.getElementById('studentInfo');
+      infoDiv.innerHTML = `
+        <p class="muted" style="margin:0;"><strong>學生基本資訊</strong></p>
+        <p class="muted" style="margin:8px 0 0;">姓名：${app.student_name} | 學號：${app.student_id}</p>
+        <p class="muted" style="margin:4px 0 0;">申請項目：${app.scholarship_name}</p>
+        <p class="muted" style="margin:4px 0 0;">GPA：${app.gpa||'-'} | 成績：${app.score||'-'}</p>
+      `;
+      
+      // 如果已有推薦信，顯示內容
+      if(app.recommendation_content){
+        document.getElementById('content').value = app.recommendation_content;
+      } else {
+        document.getElementById('content').value = '';
+      }
+    }
+    
+    async function submitRecommendation(e){
+      e.preventDefault();
+      const user = checkAuth(['Teacher']);
+      if(!user) return;
+      
+      const selectIdx = document.getElementById('studentSelect').selectedIndex;
+      if(selectIdx < 0 || !applications[selectIdx]){
+        alert('請選擇學生');
+        return;
+      }
+      
+      const app = applications[selectIdx];
+      const content = document.getElementById('content').value.trim();
+      if(!content){
+        alert('請輸入推薦內容');
+        return;
+      }
+
+      const payload = {
+        teacher_id: user.id,
+        application_id: app.id,
+        content
+      };
+
+      try{
+        const res = await fetch(`${API_BASE}/recommendation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        if(result.success){
+          alert('推薦信已送出');
+          location.reload();
+        }else{
+          alert('送出失敗: '+result.message);
+        }
+      }catch(e){
+        alert('送出失敗: '+e.message);
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

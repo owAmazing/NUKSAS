@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>系統管理員端 - ScholarLink</title>
+  <script src="../auth.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap');
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --surface: #0b1220;
+      --accent: #7dd3fc;
+      --accent-strong: #22d3ee;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2937;
+      --shadow: 0 24px 60px rgba(0,0,0,0.35);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(56,189,248,0.06), transparent 25%),
+                  radial-gradient(circle at 80% 10%, rgba(14,165,233,0.07), transparent 26%),
+                  radial-gradient(circle at 50% 80%, rgba(56,189,248,0.05), transparent 30%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(12px);
+      background: rgba(15,23,42,0.8);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 22px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .brand .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      box-shadow: 0 0 18px rgba(125,211,252,0.6);
+    }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      margin-left: 18px;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+    nav a:hover { color: var(--accent-strong); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px 22px 60px; }
+    .grid { display: grid; gap: 18px; }
+    .card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 18px 20px;
+      box-shadow: var(--shadow);
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(125,211,252,0.15);
+      color: var(--accent-strong);
+      border: 1px solid rgba(125,211,252,0.35);
+    }
+    .hero {
+      margin: 28px 0 10px;
+      padding: 26px;
+      border-radius: 16px;
+      background: linear-gradient(120deg, rgba(14,165,233,0.25), rgba(8,47,73,0.65)),
+                  linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.8));
+      border: 1px solid rgba(125,211,252,0.35);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 12px;
+    }
+    .hero h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; }
+    .hero p { margin: 0; color: var(--muted); max-width: 760px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn {
+      padding: 11px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: 0.2px;
+      transition: all 0.2s ease;
+      display: inline-block;
+    }
+    .btn:hover { border-color: var(--accent-strong); color: var(--accent-strong); }
+    .btn.primary { background: linear-gradient(120deg, var(--accent), var(--accent-strong)); color: #0b1220; border: none; box-shadow: 0 12px 40px rgba(34,211,238,0.28); }
+    .btn.primary:hover { transform: translateY(-1px); }
+    .btn.danger { background: rgba(244,63,94,0.15); color: #fda4af; border-color: rgba(244,63,94,0.3); }
+    .scholar-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .scholar-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: rgba(255,255,255,0.02); box-shadow: var(--shadow); display: grid; gap: 8px; }
+    form { display: grid; gap: 12px; }
+    label { font-weight: 600; color: var(--text); font-size: 14px; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 12px; }
+    th, td { padding: 12px 10px; text-align: left; }
+    th { background: rgba(255,255,255,0.04); border-bottom: 1px solid var(--border); font-size: 13px; letter-spacing: 0.3px; }
+    tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+    tr:hover { background: rgba(34,211,238,0.05); }
+    .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; align-items: start; }
+    .muted { color: var(--muted); font-size: 13px; }
+    footer { margin-top: 40px; color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0 40px; }
+    @media (max-width: 720px) {
+      .hero h1 { font-size: 24px; }
+      nav a { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand"><span class="dot"></span>ScholarLink <span style="font-size:14px; color: var(--accent-strong); margin-left:8px;">系統管理員</span></div>
+      <nav>
+        <a href="admin_scholarships.html">獎助管理</a>
+        <a href="admin_announcements.html">公告管理</a>
+        <a href="admin_identity_proof.html">身份文件管理</a>
+        <a href="admin_accounts.html">帳號管理</a>
+        <a href="/scholarship/pages/login.html">登出</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <section class="hero">
+      <h1>📢 公告管理</h1>
+      <p>發布與管理系統公告、申請通知與結果通知。</p>
+    </section>
+
+    <section id="announcements" class="card">
+      <div class="section-title">公告列表 <span class="pill">Announcement</span></div>
+      <div class="actions" style="margin-bottom:16px;">
+        <a class="btn primary" href="#add-announcement">+ 新增公告</a>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>公告標題</th>
+              <th>發布日期</th>
+              <th>發布人</th>
+              <th>內容</th>
+            </tr>
+          </thead>
+          <tbody id="announcementBody">
+            <tr><td colspan="4" style="text-align:center; color: var(--muted);">載入中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <section id="add-announcement" class="card">
+      <div class="section-title">新增公告 <span class="pill">Create</span></div>
+      <div class="split">
+        <form id="announcementForm" onsubmit="createAnnouncement(event)">
+          <div>
+            <label>公告標題 *</label>
+            <input type="text" id="announceTitle" required placeholder="例如：112-2 助學金申請開放">
+          </div>
+          <div>
+            <label>內容 *</label>
+            <textarea id="announceContent" required placeholder="輸入公告內容..." rows="6"></textarea>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center;">
+            <button class="btn primary" type="submit">發布公告</button>
+          </div>
+        </form>
+        <div class="card" style="background: rgba(255,255,255,0.02);">
+          <h4 style="margin:0 0 8px;">發布提示</h4>
+          <p class="muted">1. 標題與內容為必填。</p>
+          <p class="muted">2. 發布後會立即出現在列表。</p>
+          <p class="muted">3. 發布人會記錄目前登入的管理員 ID。</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    ScholarLink 系統管理員端 © 2026 · <a href="/scholarship/pages/login.html" style="color:var(--accent-strong); text-decoration:none;">返回登入頁</a>
+  </footer>
+  <script>
+    const API_BASE = '/scholarship/api';
+    let currentUser = null;
+
+    async function loadAnnouncements() {
+      try {
+        const res = await fetch(`${API_BASE}/announcements`);
+        const result = await res.json();
+        if (!result.success) throw new Error(result.message || '載入失敗');
+        renderAnnouncements(result.data || []);
+      } catch (err) {
+        renderError(err.message || '載入失敗');
+      }
+    }
+
+    function renderAnnouncements(items) {
+      const body = document.getElementById('announcementBody');
+      if (!items.length) {
+        body.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--muted);">目前沒有公告</td></tr>';
+        return;
+      }
+      body.innerHTML = items.map(a => {
+        const date = a.publish_date ? new Date(a.publish_date).toLocaleString('zh-TW') : '-';
+        const content = a.content ? a.content.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
+        return `
+          <tr>
+            <td>${a.title || '-'}</td>
+            <td>${date}</td>
+            <td>${a.publisher_name || '-'}</td>
+            <td style="max-width:420px; white-space:pre-wrap;">${content}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderError(message) {
+      document.getElementById('announcementBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:#f87171;">${message}</td></tr>`;
+    }
+
+    async function createAnnouncement(event) {
+      event.preventDefault();
+      const title = document.getElementById('announceTitle').value.trim();
+      const content = document.getElementById('announceContent').value.trim();
+      if (!title || !content) {
+        alert('請填寫標題與內容');
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/announcements`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, content, admin_id: currentUser?.id })
+        });
+        const result = await res.json();
+        if (!res.ok || !result.success) throw new Error(result.message || '新增失敗');
+        alert('公告已新增');
+        document.getElementById('announcementForm').reset();
+        loadAnnouncements();
+        window.location.hash = '#announcements';
+      } catch (err) {
+        alert(err.message || '新增失敗');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      currentUser = checkAuth(['SystemAdministrator']);
+      if (!currentUser) return;
+      loadAnnouncements();
+    });
+  </script>
+</body>
+</html>

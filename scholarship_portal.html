@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScholarLink 獎助學金申請系統</title>
+  <style>
+    /* Font & color system */
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap');
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --surface: #0b1220;
+      --accent: #7dd3fc;
+      --accent-strong: #22d3ee;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --warn: #f59e0b;
+      --danger: #f43f5e;
+      --success: #22c55e;
+      --border: #1f2937;
+      --shadow: 0 24px 60px rgba(0,0,0,0.35);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(56,189,248,0.06), transparent 25%),
+                  radial-gradient(circle at 80% 10%, rgba(14,165,233,0.07), transparent 26%),
+                  radial-gradient(circle at 50% 80%, rgba(56,189,248,0.05), transparent 30%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(12px);
+      background: rgba(15,23,42,0.8);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 22px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .brand .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      box-shadow: 0 0 18px rgba(125,211,252,0.6);
+    }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      margin-left: 18px;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+    nav a:hover { color: var(--accent-strong); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px 22px 60px; }
+    .grid { display: grid; gap: 18px; }
+    .card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 18px 20px;
+      box-shadow: var(--shadow);
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(125,211,252,0.15);
+      color: var(--accent-strong);
+      border: 1px solid rgba(125,211,252,0.35);
+    }
+    .hero {
+      margin: 28px 0 10px;
+      padding: 26px;
+      border-radius: 16px;
+      background: linear-gradient(120deg, rgba(14,165,233,0.25), rgba(8,47,73,0.65)),
+                  linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.8));
+      border: 1px solid rgba(125,211,252,0.35);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 12px;
+    }
+    .hero h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; }
+    .hero p { margin: 0; color: var(--muted); max-width: 760px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn {
+      padding: 11px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: 0.2px;
+      transition: all 0.2s ease;
+    }
+    .btn:hover { border-color: var(--accent-strong); color: var(--accent-strong); }
+    .btn.primary { background: linear-gradient(120deg, var(--accent), var(--accent-strong)); color: #0b1220; border: none; box-shadow: 0 12px 40px rgba(34,211,238,0.28); }
+    .btn.primary:hover { transform: translateY(-1px); }
+
+    /* Role switcher */
+    .role-switch {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .role-chip {
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .role-chip.active {
+      border-color: var(--accent-strong);
+      background: rgba(34,211,238,0.18);
+      color: var(--accent-strong);
+      box-shadow: 0 10px 30px rgba(34,211,238,0.18);
+    }
+
+    .role-hidden { display: none !important; }
+
+    /* Announcement board */
+    .announcement-list { display: grid; gap: 12px; }
+    .announcement-item {
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .announcement-item strong { color: var(--text); }
+    .announcement-meta { color: var(--muted); font-size: 13px; }
+
+    /* Scholarship cards */
+    .scholar-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .scholar-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: rgba(255,255,255,0.02); box-shadow: var(--shadow); display: grid; gap: 8px; }
+    .scholar-header { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+    .badge { padding: 4px 8px; border-radius: 8px; font-size: 12px; background: rgba(34,211,238,0.15); color: var(--accent-strong); }
+    .meta { color: var(--muted); font-size: 13px; }
+    .deadline { color: var(--warn); font-weight: 700; }
+
+    /* Form & table */
+    form { display: grid; gap: 12px; }
+    label { font-weight: 600; color: var(--text); font-size: 14px; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 12px; }
+    th, td { padding: 12px 10px; text-align: left; }
+    th { background: rgba(255,255,255,0.04); border-bottom: 1px solid var(--border); font-size: 13px; letter-spacing: 0.3px; }
+    tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+    tr:hover { background: rgba(34,211,238,0.05); }
+
+    .status { padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; display: inline-block; }
+    .status.draft { background: rgba(148,163,184,0.18); color: #e5e7eb; }
+    .status.review { background: rgba(59,130,246,0.18); color: #93c5fd; }
+    .status.pass { background: rgba(34,197,94,0.18); color: #86efac; }
+    .status.fail { background: rgba(248,113,113,0.2); color: #fecdd3; }
+
+    /* Layout helpers */
+    .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; align-items: start; }
+    .muted { color: var(--muted); font-size: 13px; }
+    footer { margin-top: 40px; color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0 40px; }
+
+    @media (max-width: 720px) {
+      nav { display: none; }
+      .hero h1 { font-size: 24px; }
+      .actions { width: 100%; }
+      .actions .btn { flex: 1 1 200px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand"><span class="dot"></span>ScholarLink</div>
+      <nav>
+        <a href="#announcements">公告</a>
+        <a href="#scholarships">獎助清單</a>
+        <a href="#apply">線上申請</a>
+        <a href="#applications">申請追蹤</a>
+        <a href="#recommender">推薦信</a>
+        <a href="#review">審查端</a>
+        <a href="#admin">管理端</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <section class="hero">
+      <p class="pill">獎助學金一站式入口</p>
+      <h1>申請、推薦、審查、公告，一頁完成</h1>
+      <p>對應系統需求：學生線上申請與追蹤、導師推薦、審查單位核定、管理員公告與獎助設定。此頁可作為課程專題的操作介面範本。</p>
+      <div class="actions">
+        <a class="btn primary" href="#apply">我要申請</a>
+        <a class="btn" href="#admin">管理員後台</a>
+        <a class="btn" href="#review">審查端</a>
+      </div>
+      <div class="role-switch" aria-label="切換角色視圖">
+        <div class="role-chip active" data-role="student">學生端</div>
+        <div class="role-chip" data-role="organization">發放獎學金機構端</div>
+        <div class="role-chip" data-role="teacher">老師推薦端</div>
+        <div class="role-chip" data-role="admin">系統管理員端</div>
+      </div>
+    </section>
+
+    <section id="login" class="card role-section" data-roles="student">
+      <div class="section-title">學生登入 <span class="pill">User authentication</span></div>
+      <div class="split">
+        <div>
+          <p class="muted">使用學號與密碼登入系統，查看可申請獎助學金、送出申請、追蹤審查結果。</p>
+          <ul class="muted" style="padding-left:18px; margin:10px 0 16px; line-height:1.5;">
+            <li>首次登入請使用學校提供的預設密碼</li>
+            <li>登入後請立即修改密碼</li>
+            <li>忘記密碼可聯絡系統管理員</li>
+          </ul>
+        </div>
+        <form style="max-width: 400px;">
+          <div>
+            <label>學號</label>
+            <input type="text" placeholder="請輸入學號" required>
+          </div>
+          <div>
+            <label>密碼</label>
+            <input type="password" placeholder="請輸入密碼" required>
+          </div>
+          <div class="actions">
+            <button class="btn primary" type="submit">登入系統</button>
+            <button class="btn" type="button">忘記密碼</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="announcements" class="card role-section" data-roles="student,organization,teacher,admin">
+      <div class="section-title">公告區 <span class="pill">Apply / Result announce</span></div>
+      <div class="announcement-list">
+        <div class="announcement-item">
+          <div>
+            <strong>112-2 學期境外生助學金申請開放</strong><div class="announcement-meta">申請起：2026/01/05 · 截止：2026/02/05 · 需附境外生證明</div>
+          </div>
+          <span class="badge">申請公告</span>
+        </div>
+        <div class="announcement-item">
+          <div>
+            <strong>弱勢助學金第二階段補件通知</strong><div class="announcement-meta">補件截止：2026/01/25 · 缺件：低收入證明、戶籍謄本</div>
+          </div>
+          <span class="badge">補件</span>
+        </div>
+        <div class="announcement-item">
+          <div>
+            <strong>112-1 獎助結果公告</strong><div class="announcement-meta">公告日：2025/12/28 · 通過名單請登入查詢</div>
+          </div>
+          <span class="badge">結果公告</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="scholarships" class="card role-section" data-roles="student">
+      <div class="section-title">得知可申請的獎學金資訊 <span class="pill">Scholarship + organization</span></div>
+      <div class="grid scholar-grid">
+        <article class="scholar-card">
+          <div class="scholar-header">
+            <h3>境外學生助學金</h3>
+            <span class="badge">$30,000</span>
+          </div>
+          <div class="meta">提供單位：國際事務處 · 需境外生身分與中文檢定</div>
+          <div class="meta">申請方式：線上填寫，繳交境外身分證明、中文檢定證明</div>
+          <div class="deadline">截止 2026/02/05</div>
+          <div class="actions"><a class="btn primary" href="#apply">立即申請</a></div>
+        </article>
+        <article class="scholar-card">
+          <div class="scholar-header">
+            <h3>弱勢助學金</h3>
+            <span class="badge">$20,000</span>
+          </div>
+          <div class="meta">提供單位：學務處 · 需低收入或中低收入證明</div>
+          <div class="meta">申請方式：線上填寫並上傳證明；導師推薦信可選</div>
+          <div class="deadline">截止 2026/01/25</div>
+          <div class="actions"><a class="btn" href="#apply">填寫申請</a></div>
+        </article>
+        <article class="scholar-card">
+          <div class="scholar-header">
+            <h3>身心障礙學生助學金</h3>
+            <span class="badge">$25,000</span>
+          </div>
+          <div class="meta">提供單位：學生事務處 · 需身心障礙證明</div>
+          <div class="meta">申請方式：線上填寫並上傳身障手冊，導師推薦需上傳</div>
+          <div class="deadline">截止 2026/02/10</div>
+          <div class="actions"><a class="btn" href="#apply">填寫申請</a></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="apply" class="card role-section" data-roles="student">
+      <div class="section-title">線上申請表 <span class="pill">apply data</span></div>
+      <div class="split">
+        <form>
+          <div>
+            <label>姓名</label>
+            <input type="text" placeholder="自動帶入 User.name" required>
+          </div>
+          <div>
+            <label>學號 / 身分證字號</label>
+            <input type="text" placeholder="Student.identity" required>
+          </div>
+          <div>
+            <label>聯絡 Email</label>
+            <input type="email" placeholder="user@example.edu" required>
+          </div>
+          <div>
+            <label>聯絡電話</label>
+            <input type="text" placeholder="可多筆 phone" required>
+          </div>
+          <div>
+            <label>申請獎助學金</label>
+            <select required>
+              <option value="">請選擇</option>
+              <option>境外學生助學金</option>
+              <option>弱勢助學金</option>
+              <option>身心障礙學生助學金</option>
+            </select>
+          </div>
+          <div>
+            <label>成績（GPA / 總分）</label>
+            <input type="text" placeholder="apply data.score" required>
+          </div>
+          <div>
+            <label>操行分數 / 排名</label>
+            <input type="text" placeholder="conduct score / rank" required>
+          </div>
+          <div>
+            <label>申請條件說明</label>
+            <textarea placeholder="針對 apply condition 說明資格"></textarea>
+          </div>
+          <div>
+            <label>申請方式 / 上傳附件</label>
+            <input type="file" multiple>
+            <p class="muted">支援成績單、證明文件，單檔上限 10MB，支援 PDF/JPG/PNG。</p>
+          </div>
+          <div>
+            <label>導師推薦人（可選）</label>
+            <input type="text" placeholder="Teacher.id / email">
+          </div>
+          <div class="actions">
+            <button class="btn" type="button">儲存草稿</button>
+            <button class="btn primary" type="submit">送出申請</button>
+          </div>
+        </form>
+        <div class="card" style="background: rgba(34,211,238,0.06); border-color: rgba(34,211,238,0.4);">
+          <div class="section-title" style="margin-bottom:8px;">填寫提示</div>
+          <p class="muted">1) 日期自動對應 Apply announce（apply_date, apply_deadline）。</p>
+          <p class="muted">2) 獎助名稱對應 Scholarship.name；送出後 apply state = submitted。</p>
+          <p class="muted">3) 導師推薦若填寫，系統寄出邀請給 Teacher；完成後連回 apply data。</p>
+          <p class="muted">4) 補件時狀態變更為 pending docs，通知學生。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="applications" class="card role-section" data-roles="student">
+      <div class="section-title">查看申請結果 <span class="pill">apply state / result</span></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>獎助名稱</th>
+              <th>送出日</th>
+              <th>狀態</th>
+              <th>審查備註</th>
+              <th>結果</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>境外學生助學金</td>
+              <td>2026/01/06</td>
+              <td><span class="status review">審查中</span></td>
+              <td>資格審核中</td>
+              <td>—</td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#">查看詳情</a></td>
+            </tr>
+            <tr>
+              <td>弱勢助學金</td>
+              <td>2026/01/03</td>
+              <td><span class="status fail">補件中</span></td>
+              <td>需補上低收入證明</td>
+              <td>—</td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#apply">前往補件</a></td>
+            </tr>
+            <tr>
+              <td>身心障礙助學金</td>
+              <td>2025/12/18</td>
+              <td><span class="status pass">通過</span></td>
+              <td>審查通過，待撥款</td>
+              <td>$25,000</td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#">下載證明</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:16px;">
+        <p class="muted">💡 提示：申請狀態會即時更新，審查結果將以 Email 通知。如有疑問請聯絡承辦單位。</p>
+      </div>
+    </section>
+
+    <section id="profile" class="card role-section" data-roles="student">
+      <div class="section-title">修改基本資料 <span class="pill">User / Student profile</span></div>
+      <div class="split">
+        <form>
+          <div>
+            <label>姓名</label>
+            <input type="text" value="王小明" required>
+          </div>
+          <div>
+            <label>學號</label>
+            <input type="text" value="A123456789" disabled style="opacity:0.6;">
+            <p class="muted">學號無法修改</p>
+          </div>
+          <div>
+            <label>身分證字號</label>
+            <input type="text" value="A123456789" required>
+          </div>
+          <div>
+            <label>Email</label>
+            <input type="email" value="student@example.edu" required>
+          </div>
+          <div>
+            <label>聯絡電話（可多筆）</label>
+            <input type="text" value="0912345678" placeholder="主要電話" required>
+            <input type="text" placeholder="次要電話（選填）" style="margin-top:8px;">
+          </div>
+          <div>
+            <label>學生身分別</label>
+            <select>
+              <option>一般生</option>
+              <option>低收入戶</option>
+              <option>中低收入戶</option>
+              <option>身心障礙學生</option>
+              <option>原住民學生</option>
+              <option selected>境外學生（僑生/外籍生）</option>
+            </select>
+          </div>
+          <div>
+            <label>主修科系</label>
+            <input type="text" value="資訊工程學系" required>
+          </div>
+          <div class="actions">
+            <button class="btn" type="button">取消</button>
+            <button class="btn primary" type="submit">儲存變更</button>
+          </div>
+        </form>
+        <div class="card" style="background: rgba(34,211,238,0.06); border-color: rgba(34,211,238,0.4);">
+          <div class="section-title" style="margin-bottom:8px;">個資說明</div>
+          <p class="muted">• 姓名、身分證號、Email 與電話將用於申請審核與通知。</p>
+          <p class="muted">• 身分別需上傳相關證明（如低收證明、身障手冊、僑生居留證等）。</p>
+          <p class="muted">• 資料變更後請確認申請表是否需同步更新。</p>
+          <p class="muted">• 學號為系統識別碼，無法自行修改。</p>
+          <div style="margin-top:12px;">
+            <label style="font-size:13px;">上傳身分證明文件</label>
+            <input type="file" style="margin-top:6px;">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="recommender" class="card role-section" data-roles="teacher">
+      <div class="section-title">導師推薦信 <span class="pill">recommend</span></div>
+      <div class="split">
+        <div>
+          <p class="muted">導師可檢視所屬學生申請，撰寫或上傳推薦信。送出後鎖定並寫入 update date。</p>
+          <ul class="muted" style="padding-left:18px; margin:10px 0 16px; line-height:1.5;">
+            <li>查詢學生列表與申請資料</li>
+            <li>線上輸入推薦內容或上傳 PDF</li>
+            <li>允許重新編輯直到提交</li>
+            <li>送出後狀態同步到 apply data</li>
+          </ul>
+        </div>
+        <form>
+          <div>
+            <label>學生</label>
+            <select>
+              <option>王小明（境外助學金）</option>
+              <option>林佳欣（弱勢助學金）</option>
+            </select>
+          </div>
+          <div>
+            <label>推薦內容</label>
+            <textarea placeholder="請輸入對學生之觀察、表現、需求說明"></textarea>
+          </div>
+          <div>
+            <label>上傳推薦信（可選）</label>
+            <input type="file">
+          </div>
+          <div class="actions">
+            <button class="btn" type="button">暫存</button>
+            <button class="btn primary" type="submit">送出推薦</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="review" class="card role-section" data-roles="organization">
+      <div class="section-title">審查端 <span class="pill">pass / apply data / organization</span></div>
+      <div class="split">
+        <div class="card" style="background: rgba(255,255,255,0.02);">
+          <h4 style="margin:0 0 10px;">待審申請</h4>
+          <div class="announcement-item" style="margin-bottom:10px;">
+            <div>
+              <strong>境外助學金 · 王小明</strong>
+              <div class="announcement-meta">送出 2026/01/06 · GPA 3.8 · 文件齊全</div>
+            </div>
+            <span class="badge">Pending</span>
+          </div>
+          <div class="announcement-item">
+            <div>
+              <strong>弱勢助學金 · 林佳欣</strong>
+              <div class="announcement-meta">送出 2026/01/03 · 缺低收證明</div>
+            </div>
+            <span class="badge" style="background: rgba(244,63,94,0.18); color: #fecdd3;">補件</span>
+          </div>
+        </div>
+        <form>
+          <div>
+            <label>審查結果</label>
+            <select>
+              <option>通過</option>
+              <option>不通過</option>
+              <option>要求補件</option>
+            </select>
+          </div>
+          <div>
+            <label>審查意見</label>
+            <textarea placeholder="填寫審查理由、核定金額調整等"></textarea>
+          </div>
+          <div>
+            <label>核定金額</label>
+            <input type="number" placeholder="$amount" value="30000">
+          </div>
+          <div class="actions">
+            <button class="btn" type="button">暫存</button>
+            <button class="btn primary" type="submit">送出結果</button>
+          </div>
+          <p class="muted">送出後產生 Result announce 草稿並通知學生，pass 表更新。</p>
+        </form>
+      </div>
+    </section>
+
+    <section id="admin" class="card role-section" data-roles="admin">
+      <div class="section-title">系統管理員 <span class="pill">Scholarship / Announcement / System administration</span></div>
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(240px,1fr));">
+        <div class="scholar-card">
+          <h4 style="margin:0 0 6px;">獎助設定</h4>
+          <p class="muted">新增/修改/刪除獎助：名稱、獎助單位、金額、條件、申請起迄、所需資料、是否需推薦。</p>
+          <div class="actions"><a class="btn" href="#">新增獎助</a></div>
+        </div>
+        <div class="scholar-card">
+          <h4 style="margin:0 0 6px;">公告管理</h4>
+          <p class="muted">張貼 Apply announce 與 Result announce，支援富文本與附件，上架/下架時間。</p>
+          <div class="actions"><a class="btn" href="#">新增公告</a></div>
+        </div>
+        <div class="scholar-card">
+          <h4 style="margin:0 0 6px;">帳號與權限</h4>
+          <p class="muted">建立/停用帳號，指派角色（學生/導師/審查單位/管理員），重設密碼。</p>
+          <div class="actions"><a class="btn" href="#">管理帳號</a></div>
+        </div>
+        <div class="scholar-card">
+          <h4 style="margin:0 0 6px;">檔案與通知</h4>
+          <p class="muted">檔案大小限制、允許格式、Email/簡訊通知模板，補件通知設定。</p>
+          <div class="actions"><a class="btn" href="#">調整設定</a></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Simple role toggle: show sections that include the role in data-roles
+    const chips = Array.from(document.querySelectorAll('.role-chip'));
+    const sections = Array.from(document.querySelectorAll('.role-section'));
+    function activate(role) {
+      chips.forEach(c => c.classList.toggle('active', c.dataset.role === role));
+      sections.forEach(sec => {
+        const roles = (sec.dataset.roles || '').split(',');
+        sec.classList.toggle('role-hidden', !roles.includes(role));
+      });
+    }
+    chips.forEach(c => c.addEventListener('click', () => activate(c.dataset.role)));
+    activate('student');
+  </script>
+
+  <footer>
+    ScholarLink · 獎助學金申請系統介面範本 · 2026
+  </footer>
+</body>
+</html>

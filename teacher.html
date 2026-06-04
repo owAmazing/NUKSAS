@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>教師端 - ScholarLink</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap');
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --surface: #0b1220;
+      --accent: #7dd3fc;
+      --accent-strong: #22d3ee;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --warn: #f59e0b;
+      --border: #1f2937;
+      --shadow: 0 24px 60px rgba(0,0,0,0.35);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(56,189,248,0.06), transparent 25%),
+                  radial-gradient(circle at 80% 10%, rgba(14,165,233,0.07), transparent 26%),
+                  radial-gradient(circle at 50% 80%, rgba(56,189,248,0.05), transparent 30%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(12px);
+      background: rgba(15,23,42,0.8);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 22px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .brand .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      box-shadow: 0 0 18px rgba(125,211,252,0.6);
+    }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      margin-left: 18px;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+    nav a:hover { color: var(--accent-strong); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px 22px 60px; }
+    .grid { display: grid; gap: 18px; }
+    .card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 18px 20px;
+      box-shadow: var(--shadow);
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(125,211,252,0.15);
+      color: var(--accent-strong);
+      border: 1px solid rgba(125,211,252,0.35);
+    }
+    .hero {
+      margin: 28px 0 10px;
+      padding: 26px;
+      border-radius: 16px;
+      background: linear-gradient(120deg, rgba(14,165,233,0.25), rgba(8,47,73,0.65)),
+                  linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.8));
+      border: 1px solid rgba(125,211,252,0.35);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 12px;
+    }
+    .hero h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; }
+    .hero p { margin: 0; color: var(--muted); max-width: 760px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn {
+      padding: 11px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: 0.2px;
+      transition: all 0.2s ease;
+      display: inline-block;
+    }
+    .btn:hover { border-color: var(--accent-strong); color: var(--accent-strong); }
+    .btn.primary { background: linear-gradient(120deg, var(--accent), var(--accent-strong)); color: #0b1220; border: none; box-shadow: 0 12px 40px rgba(34,211,238,0.28); }
+    .btn.primary:hover { transform: translateY(-1px); }
+    .announcement-list { display: grid; gap: 12px; }
+    .announcement-item {
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .announcement-item strong { color: var(--text); }
+    .announcement-meta { color: var(--muted); font-size: 13px; }
+    .badge { padding: 4px 8px; border-radius: 8px; font-size: 12px; background: rgba(34,211,238,0.15); color: var(--accent-strong); }
+    form { display: grid; gap: 12px; }
+    label { font-weight: 600; color: var(--text); font-size: 14px; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 12px; }
+    th, td { padding: 12px 10px; text-align: left; }
+    th { background: rgba(255,255,255,0.04); border-bottom: 1px solid var(--border); font-size: 13px; letter-spacing: 0.3px; }
+    tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+    tr:hover { background: rgba(34,211,238,0.05); }
+    .status { padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; display: inline-block; }
+    .status.pending { background: rgba(245,158,11,0.18); color: #fbbf24; }
+    .status.done { background: rgba(34,197,94,0.18); color: #86efac; }
+    .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; align-items: start; }
+    .muted { color: var(--muted); font-size: 13px; }
+    footer { margin-top: 40px; color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0 40px; }
+    @media (max-width: 720px) {
+      .hero h1 { font-size: 24px; }
+      nav a { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand"><span class="dot"></span>ScholarLink <span style="font-size:14px; color: var(--accent-strong); margin-left:8px;">教師端</span></div>
+      <nav>
+        <a href="#students">學生列表</a>
+        <a href="#recommender">推薦信管理</a>
+        <a href="#announcements">公告</a>
+        <a href="index.html">登出</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <section class="hero">
+      <h1>👨‍🏫 教師推薦信管理系統</h1>
+      <p>歡迎回來，張老師！您可以查看指導學生的獎助學金申請、撰寫推薦信，協助學生完成申請流程。</p>
+    </section>
+
+    <section id="announcements" class="card">
+      <div class="section-title">最新公告 <span class="pill">Apply / Result announce</span></div>
+      <div class="announcement-list">
+        <div class="announcement-item">
+          <div>
+            <strong>112-2 學期境外生助學金申請開放</strong>
+            <div class="announcement-meta">申請起：2026/01/05 · 截止：2026/02/05 · 需附境外生證明</div>
+          </div>
+          <span class="badge">申請公告</span>
+        </div>
+        <div class="announcement-item">
+          <div>
+            <strong>導師推薦信填寫提醒</strong>
+            <div class="announcement-meta">請於學生申請截止日前完成推薦信撰寫並送出</div>
+          </div>
+          <span class="badge">提醒</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="students" class="card">
+      <div class="section-title">指導學生申請列表 <span class="pill">Student applications</span></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>學生姓名</th>
+              <th>學號</th>
+              <th>申請獎助學金</th>
+              <th>申請日期</th>
+              <th>推薦信狀態</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>王小明</td>
+              <td>A123456789</td>
+              <td>境外學生助學金</td>
+              <td>2026/01/06</td>
+              <td><span class="status pending">待撰寫</span></td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#recommender">撰寫推薦</a></td>
+            </tr>
+            <tr>
+              <td>林佳欣</td>
+              <td>A123456790</td>
+              <td>弱勢助學金</td>
+              <td>2026/01/03</td>
+              <td><span class="status pending">待撰寫</span></td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#recommender">撰寫推薦</a></td>
+            </tr>
+            <tr>
+              <td>陳大衛</td>
+              <td>A123456791</td>
+              <td>學業成績優異獎學金</td>
+              <td>2025/12/20</td>
+              <td><span class="status done">已送出</span></td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#">檢視內容</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:16px;">
+        <p class="muted">💡 提示：學生提交申請後若選填您為推薦人，系統會自動發送通知。請於截止日前完成推薦信撰寫。</p>
+      </div>
+    </section>
+
+    <section id="recommender" class="card">
+      <div class="section-title">撰寫/編輯推薦信 <span class="pill">recommend</span></div>
+      <div class="split">
+        <div>
+          <h3 style="margin:0 0 12px; font-size:18px;">推薦信功能說明</h3>
+          <ul class="muted" style="padding-left:18px; margin:10px 0 16px; line-height:1.6;">
+            <li>查詢指導學生列表與申請資料</li>
+            <li>線上輸入推薦內容或上傳 PDF 檔案</li>
+            <li>允許重新編輯直到正式提交</li>
+            <li>送出後狀態同步到 apply data 並鎖定</li>
+            <li>推薦信將作為審查單位的重要參考</li>
+          </ul>
+          <div class="card" style="background: rgba(34,211,238,0.06); border-color: rgba(34,211,238,0.4); margin-top:16px;">
+            <p class="muted" style="margin:0;"><strong>學生基本資訊</strong></p>
+            <p class="muted" style="margin:8px 0 0;">姓名：王小明 | 學號：A123456789</p>
+            <p class="muted" style="margin:4px 0 0;">申請項目：境外學生助學金</p>
+            <p class="muted" style="margin:4px 0 0;">GPA：3.8 | 操行：88 | 班排名：15/50</p>
+          </div>
+        </div>
+        <form>
+          <div>
+            <label>選擇學生</label>
+            <select>
+              <option>王小明（境外助學金）</option>
+              <option>林佳欣（弱勢助學金）</option>
+            </select>
+          </div>
+          <div>
+            <label>推薦內容</label>
+            <textarea placeholder="請輸入對學生之觀察、學習表現、品行操守、特殊需求等說明，協助審查單位了解學生狀況"></textarea>
+          </div>
+          <div>
+            <label>或上傳推薦信檔案（可選）</label>
+            <input type="file" accept=".pdf,.doc,.docx">
+            <p class="muted">支援 PDF、Word 格式，單檔上限 5MB</p>
+          </div>
+          <div>
+            <label>推薦強度</label>
+            <select>
+              <option>強烈推薦</option>
+              <option selected>推薦</option>
+              <option>保留推薦</option>
+            </select>
+          </div>
+          <div class="actions">
+            <button class="btn" type="button">暫存草稿</button>
+            <button class="btn primary" type="submit">送出推薦信</button>
+          </div>
+          <p class="muted" style="margin-top:12px;">⚠️ 送出後將無法修改，請確認內容無誤。推薦信將直接送交審查單位並通知學生。</p>
+        </form>
+      </div>
+    </section>
+
+    <section id="history" class="card">
+      <div class="section-title">推薦歷史記錄 <span class="pill">History</span></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>學生</th>
+              <th>獎助學金</th>
+              <th>送出日期</th>
+              <th>推薦強度</th>
+              <th>審查結果</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>陳大衛</td>
+              <td>學業成績優異獎學金</td>
+              <td>2025/12/21</td>
+              <td>強烈推薦</td>
+              <td>通過</td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#">檢視內容</a></td>
+            </tr>
+            <tr>
+              <td>李美玲</td>
+              <td>弱勢助學金</td>
+              <td>2025/11/15</td>
+              <td>推薦</td>
+              <td>通過</td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#">檢視內容</a></td>
+            </tr>
+            <tr>
+              <td>黃志明</td>
+              <td>原住民助學金</td>
+              <td>2025/10/20</td>
+              <td>強烈推薦</td>
+              <td>通過</td>
+              <td><a class="btn" style="padding:6px 12px; font-size:12px;" href="#">檢視內容</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    ScholarLink 教師端 © 2026 · <a href="index.html" style="color:var(--accent-strong); text-decoration:none;">返回登入頁</a>
+  </footer>
+</body>
+</html>

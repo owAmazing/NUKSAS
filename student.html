@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>獎學金資訊 - ScholarLink</title>
+  <script src="auth.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap');
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --surface: #0b1220;
+      --accent: #7dd3fc;
+      --accent-strong: #22d3ee;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --warn: #f59e0b;
+      --success: #22c55e;
+      --border: #1f2937;
+      --shadow: 0 24px 60px rgba(0,0,0,0.35);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(56,189,248,0.06), transparent 25%),
+                  radial-gradient(circle at 80% 10%, rgba(14,165,233,0.07), transparent 26%),
+                  radial-gradient(circle at 50% 80%, rgba(56,189,248,0.05), transparent 30%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(12px);
+      background: rgba(15,23,42,0.8);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 22px;
+    }
+    .brand {
+      font-weight: 700;
+      font-size: 24px;
+      color: var(--accent);
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .nav-menu {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    .nav-menu a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+      font-weight: 500;
+    }
+    .nav-menu a:hover { color: var(--accent); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px 22px 60px; }
+    .grid { display: grid; gap: 18px; }
+    .card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 18px 20px;
+      box-shadow: var(--shadow);
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(125,211,252,0.15);
+      color: var(--accent-strong);
+      border: 1px solid rgba(125,211,252,0.35);
+    }
+    .hero {
+      margin: 28px 0 10px;
+      padding: 26px;
+      border-radius: 16px;
+      background: linear-gradient(120deg, rgba(14,165,233,0.25), rgba(8,47,73,0.65)),
+                  linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.8));
+      border: 1px solid rgba(125,211,252,0.35);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 12px;
+    }
+    .hero h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; }
+    .hero p { margin: 0; color: var(--muted); max-width: 760px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn {
+      padding: 11px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: 0.2px;
+      transition: all 0.2s ease;
+      display: inline-block;
+    }
+    .btn:hover { border-color: var(--accent-strong); color: var(--accent-strong); }
+    .btn.primary { background: linear-gradient(120deg, var(--accent), var(--accent-strong)); color: #0b1220; border: none; box-shadow: 0 12px 40px rgba(34,211,238,0.28); }
+    .btn.primary:hover { transform: translateY(-1px); }
+    .announcement-list { display: grid; gap: 12px; }
+    .announcement-item {
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .announcement-item strong { color: var(--text); }
+    .announcement-meta { color: var(--muted); font-size: 13px; }
+    .scholar-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .scholar-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: rgba(255,255,255,0.02); box-shadow: var(--shadow); display: grid; gap: 8px; }
+    .scholar-header { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+    .badge { padding: 4px 8px; border-radius: 8px; font-size: 12px; background: rgba(34,211,238,0.15); color: var(--accent-strong); }
+    .meta { color: var(--muted); font-size: 13px; }
+    .deadline { color: var(--warn); font-weight: 700; }
+    form { display: grid; gap: 12px; }
+    label { font-weight: 600; color: var(--text); font-size: 14px; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 12px; }
+    th, td { padding: 12px 10px; text-align: left; }
+    th { background: rgba(255,255,255,0.04); border-bottom: 1px solid var(--border); font-size: 13px; letter-spacing: 0.3px; }
+    tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+    tr:hover { background: rgba(34,211,238,0.05); }
+    .status { padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; display: inline-block; }
+    .status.review { background: rgba(59,130,246,0.18); color: #93c5fd; }
+    .status.pass { background: rgba(34,197,94,0.18); color: #86efac; }
+    .status.fail { background: rgba(248,113,113,0.2); color: #fecdd3; }
+    .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; align-items: start; }
+    .muted { color: var(--muted); font-size: 13px; }
+    footer { margin-top: 40px; color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0 40px; }
+    @media (max-width: 720px) {
+      .hero h1 { font-size: 24px; }
+      nav a { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand">🎓 ScholarLink</div>
+      <div class="nav-menu">
+        <a href="student.html" style="color: var(--muted); text-decoration: none;">獎學金資訊</a>
+        <a href="student_profile_apache.html" style="color: var(--muted); text-decoration: none;">個人資料</a>
+        <a href="student_dashboard.html" style="color: var(--muted); text-decoration: none;">線上申請</a>
+        <a href="student_results.html" style="color: var(--muted); text-decoration: none;">申請結果</a>
+        <a href="#" style="color: var(--muted); text-decoration: none;" onclick="logout()">登出</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <section id="announcements" class="card">
+      <div class="section-title">最新公告 <span class="pill">Apply / Result announce</span></div>
+      <div class="announcement-list">
+        <div class="announcement-item">
+          <div>
+            <strong>112-2 學期境外生助學金申請開放</strong>
+            <div class="announcement-meta">申請起：2026/01/05 · 截止：2026/02/05 · 需附境外生證明</div>
+          </div>
+          <span class="badge">申請公告</span>
+        </div>
+        <div class="announcement-item">
+          <div>
+            <strong>弱勢助學金第二階段補件通知</strong>
+            <div class="announcement-meta">補件截止：2026/01/25 · 缺件：低收入證明、戶籍謄本</div>
+          </div>
+          <span class="badge">補件</span>
+        </div>
+        <div class="announcement-item">
+          <div>
+            <strong>112-1 獎助結果公告</strong>
+            <div class="announcement-meta">公告日：2025/12/28 · 通過名單請登入查詢</div>
+          </div>
+          <span class="badge">結果公告</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="scholarships" class="card">
+      <div class="section-title">可申請的獎學金資訊 <span class="pill">Scholarship + organization</span></div>
+      <div class="grid scholar-grid">
+        <article class="scholar-card">
+          <div class="scholar-header">
+            <h3 style="margin:0; font-size:18px;">境外學生助學金</h3>
+            <span class="badge">$30,000</span>
+          </div>
+          <div class="meta">提供單位：國際事務處 · 需境外生身分與中文檢定</div>
+          <div class="meta">申請方式：線上填寫，繳交境外身分證明、中文檢定證明</div>
+          <div class="deadline">截止 2026/02/05</div>
+          <div class="actions"><a class="btn primary" href="student_apply.html">立即申請</a></div>
+        </article>
+        <article class="scholar-card">
+          <div class="scholar-header">
+            <h3 style="margin:0; font-size:18px;">弱勢助學金</h3>
+            <span class="badge">$20,000</span>
+          </div>
+          <div class="meta">提供單位：學務處 · 需低收入或中低收入證明</div>
+          <div class="meta">申請方式：線上填寫並上傳證明；導師推薦信可選</div>
+          <div class="deadline">截止 2026/01/25</div>
+          <div class="actions"><a class="btn" href="student_apply.html">填寫申請</a></div>
+        </article>
+        <article class="scholar-card">
+          <div class="scholar-header">
+            <h3 style="margin:0; font-size:18px;">身心障礙學生助學金</h3>
+            <span class="badge">$25,000</span>
+          </div>
+          <div class="meta">提供單位：學生事務處 · 需身心障礙證明</div>
+          <div class="meta">申請方式：線上填寫並上傳身障手冊，導師推薦需上傳</div>
+          <div class="deadline">截止 2026/02/10</div>
+          <div class="actions"><a class="btn" href="student_apply.html">填寫申請</a></div>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    ScholarLink 獎學金資訊 © 2026
+  </footer>
+
+  <script>
+    // 檢查認證
+    const currentUser = checkAuth(['Student']);
+    if (!currentUser) {
+      throw new Error('Unauthorized');
+    }
+  </script>
+</body>
+</html>

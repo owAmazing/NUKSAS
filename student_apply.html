@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>線上申請獎學金 - ScholarLink</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap');
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --surface: #0b1220;
+      --accent: #7dd3fc;
+      --accent-strong: #22d3ee;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2937;
+      --shadow: 0 24px 60px rgba(0,0,0,0.35);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(56,189,248,0.06), transparent 25%),
+                  radial-gradient(circle at 80% 10%, rgba(14,165,233,0.07), transparent 26%),
+                  radial-gradient(circle at 50% 80%, rgba(56,189,248,0.05), transparent 30%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(12px);
+      background: rgba(15,23,42,0.8);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 22px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .brand .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      box-shadow: 0 0 18px rgba(125,211,252,0.6);
+    }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      margin-left: 18px;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+    nav a:hover { color: var(--accent-strong); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px 22px 60px; }
+    .card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 18px 20px;
+      box-shadow: var(--shadow);
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(125,211,252,0.15);
+      color: var(--accent-strong);
+      border: 1px solid rgba(125,211,252,0.35);
+    }
+    .hero {
+      margin: 28px 0 10px;
+      padding: 26px;
+      border-radius: 16px;
+      background: linear-gradient(120deg, rgba(14,165,233,0.25), rgba(8,47,73,0.65)),
+                  linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.8));
+      border: 1px solid rgba(125,211,252,0.35);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 12px;
+    }
+    .hero h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; }
+    .hero p { margin: 0; color: var(--muted); max-width: 760px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn {
+      padding: 11px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: 0.2px;
+      transition: all 0.2s ease;
+      display: inline-block;
+    }
+    .btn:hover { border-color: var(--accent-strong); color: var(--accent-strong); }
+    .btn.primary { background: linear-gradient(120deg, var(--accent), var(--accent-strong)); color: #0b1220; border: none; box-shadow: 0 12px 40px rgba(34,211,238,0.28); }
+    .btn.primary:hover { transform: translateY(-1px); }
+    form { display: grid; gap: 12px; }
+    label { font-weight: 600; color: var(--text); font-size: 14px; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; align-items: start; }
+    .muted { color: var(--muted); font-size: 13px; }
+    footer { margin-top: 40px; color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0 40px; }
+    @media (max-width: 720px) {
+      .hero h1 { font-size: 24px; }
+      nav a { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand"><span class="dot"></span>ScholarLink <span style="font-size:14px; color: var(--accent-strong); margin-left:8px;">學生端</span></div>
+      <nav>
+        <a href="student.html">返回首頁</a>
+        <a href="student_results.html">申請結果</a>
+        <a href="student_profile.html">個人資料</a>
+        <a href="index.html">登出</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <section class="hero">
+      <h1>📝 線上申請獎學金</h1>
+      <p>請填寫以下申請表格，並上傳所需文件。送出前請確認所有資料正確無誤。</p>
+    </section>
+
+    <section class="card">
+      <div class="section-title">申請表單 <span class="pill">apply data</span></div>
+      <div class="split">
+        <form>
+          <div>
+            <label>姓名</label>
+            <input type="text" value="王小明" required>
+          </div>
+          <div>
+            <label>學號</label>
+            <input type="text" value="A123456789" disabled style="opacity:0.6;">
+          </div>
+          <div>
+            <label>聯絡 Email</label>
+            <input type="email" value="student@example.edu" required>
+          </div>
+          <div>
+            <label>聯絡電話</label>
+            <input type="text" value="0912345678" required>
+          </div>
+          <div>
+            <label>申請獎助學金</label>
+            <select required>
+              <option value="">請選擇</option>
+              <option>境外學生助學金</option>
+              <option>弱勢助學金</option>
+              <option>身心障礙學生助學金</option>
+            </select>
+          </div>
+          <div>
+            <label>成績（GPA / 總分）</label>
+            <input type="text" placeholder="例如：3.8 或 85.5" required>
+          </div>
+          <div>
+            <label>操行分數 / 排名</label>
+            <input type="text" placeholder="例如：88 / 15" required>
+          </div>
+          <div>
+            <label>申請條件說明</label>
+            <textarea placeholder="請說明您符合哪些申請資格"></textarea>
+          </div>
+          <div>
+            <label>上傳申請附件</label>
+            <input type="file" multiple>
+            <p class="muted">支援成績單、證明文件，單檔上限 10MB，支援 PDF/JPG/PNG。</p>
+          </div>
+          <div>
+            <label>導師推薦人（可選）</label>
+            <input type="text" placeholder="導師姓名或 email">
+          </div>
+          <div class="actions">
+            <a class="btn" href="student.html">取消</a>
+            <button class="btn" type="button">儲存草稿</button>
+            <button class="btn primary" type="submit">送出申請</button>
+          </div>
+        </form>
+        <div class="card" style="background: rgba(34,211,238,0.06); border-color: rgba(34,211,238,0.4);">
+          <div class="section-title" style="margin-bottom:8px;">填寫提示</div>
+          <p class="muted">• 送出前請確認所有必填欄位已完成</p>
+          <p class="muted">• 若需導師推薦，系統將自動發送邀請</p>
+          <p class="muted">• 申請送出後可在「申請結果」查看進度</p>
+          <p class="muted">• 若需補件，系統會以 Email 通知</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    ScholarLink 學生端 © 2026 · <a href="student.html" style="color:var(--accent-strong); text-decoration:none;">返回首頁</a>
+  </footer>
+</body>
+</html>

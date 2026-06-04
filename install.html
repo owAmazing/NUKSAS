@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScholarLink 資料庫安裝</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+    .step {
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+    .step h3 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+    .step p {
+      color: #666;
+      line-height: 1.6;
+    }
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+      width: 100%;
+      margin-top: 20px;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102,126,234,0.4);
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      display: none;
+    }
+    .result.success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+    .result.error {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .code {
+      background: #2d3748;
+      color: #68d391;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      margin: 15px 0;
+      overflow-x: auto;
+    }
+    .info-box {
+      background: #e7f3ff;
+      border: 1px solid #b3d9ff;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .info-box strong {
+      color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎓 ScholarLink 獎助學金系統</h1>
+    <p class="subtitle">資料庫自動安裝工具 - Apache + PHP + MySQL</p>
+
+    <div class="step">
+      <h3>✅ 步驟 1: 確認環境</h3>
+      <p>請確保 XAMPP 的 Apache 和 MySQL 服務都已啟動（在 XAMPP Control Panel 中顯示綠色）</p>
+    </div>
+
+    <div class="step">
+      <h3>� 步驟 2: 資料庫設定</h3>
+      <div style="margin-top: 15px;">
+        <label style="display: block; margin-bottom: 5px; font-weight: 600;">MySQL Root 密碼：</label>
+        <input type="password" id="dbPassword" placeholder="如果沒有設定密碼，請留空" 
+               style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px;">
+        <p style="margin-top: 8px; font-size: 13px; color: #666;">
+          💡 XAMPP 預設沒有密碼（留空即可）。如果您曾經修改過 root 密碼，請在此輸入。
+        </p>
+      </div>
+    </div>
+
+    <div class="step">
+      <h3>📦 步驟 3: 建立資料庫</h3>
+      <p>點擊下方按鈕，系統將自動建立資料庫和所有必要的表格，並插入測試資料</p>
+    </div>
+
+    <div class="info-box">
+      <strong>將建立以下內容：</strong><br>
+      • 資料庫: scholarship_system<br>
+      • 15+ 個資料表<br>
+      • 測試資料（學生、教師、獎學金等）<br>
+      • 範例帳號: S001 (王小明), S002 (李小華)
+    </div>
+
+    <button class="btn" onclick="installDatabase()">🚀 開始安裝資料庫</button>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>正在建立資料庫，請稍候...</p>
+    </div>
+
+    <div class="result" id="result"></div>
+
+    <div class="step" style="margin-top: 30px; display: none;" id="nextSteps">
+      <h3>🎉 安裝完成！下一步：</h3>
+      <div class="code">
+        學生個人資料頁面:<br>
+        http://localhost/scholarship/student_profile_apache.html
+      </div>
+      <p style="margin-top: 15px;">
+        <strong>測試帳號：</strong><br>
+        • 學號: S001 (王小明 - 一般生)<br>
+        • 學號: S002 (李小華 - 僑生)
+      </p>
+    </div>
+  </div>
+
+  <script>
+    async function installDatabase() {
+      const btn = document.querySelector('.btn');
+      const loading = document.getElementById('loading');
+      const result = document.getElementById('result');
+      const nextSteps = document.getElementById('nextSteps');
+      const password = document.getElementById('dbPassword').value;
+
+      btn.disabled = true;
+      loading.style.display = 'block';
+      result.style.display = 'none';
+      nextSteps.style.display = 'none';
+
+      try {
+        const response = await fetch('install_db.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ password: password })
+        });
+        const data = await response.json();
+
+        loading.style.display = 'none';
+        result.style.display = 'block';
+
+        if (data.success) {
+          result.className = 'result success';
+          result.innerHTML = `
+            <h3>✅ 安裝成功！</h3>
+            <p>${data.message}</p>
+            ${data.details ? '<p style="margin-top:10px;"><small>' + data.details.join('<br>') + '</small></p>' : ''}
+          `;
+          nextSteps.style.display = 'block';
+          
+          // 3秒後自動跳轉
+          setTimeout(() => {
+            window.location.href = 'student_profile_apache.html';
+          }, 3000);
+        } else {
+          result.className = 'result error';
+          result.innerHTML = `
+            <h3>❌ 安裝失敗</h3>
+            <p>${data.message}</p>
+            ${data.error ? '<p style="margin-top:10px;"><code>' + data.error + '</code></p>' : ''}
+          `;
+          btn.disabled = false;
+        }
+      } catch (error) {
+        loading.style.display = 'none';
+        result.style.display = 'block';
+        result.className = 'result error';
+        result.innerHTML = `
+          <h3>❌ 發生錯誤</h3>
+          <p>無法連接到伺服器。請確認：</p>
+          <ul style="margin-top:10px; margin-left:20px;">
+            <li>XAMPP 的 Apache 和 MySQL 服務已啟動</li>
+            <li>正在使用 http://localhost 訪問</li>
+          </ul>
+          <p style="margin-top:10px;"><code>${error.message}</code></p>
+        `;
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

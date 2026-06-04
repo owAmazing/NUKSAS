@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Test</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #0f0; }
+    .test { margin: 10px 0; padding: 10px; background: #2a2a2a; border-radius: 4px; }
+    .success { color: #0f0; }
+    .error { color: #f00; }
+    .info { color: #ff0; }
+    button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    input { padding: 8px; margin: 5px; width: 200px; }
+  </style>
+</head>
+<body>
+  <h1>🔐 完整登入流程測試</h1>
+  
+  <div class="test">
+    <strong>當前 Origin:</strong> <span id="currentOrigin"></span>
+  </div>
+  
+  <h2>步驟 1: 測試 API 連接</h2>
+  <input type="text" id="testUserId" value="ADMIN001" placeholder="輸入使用者 ID">
+  <button onclick="testLogin()">測試登入 API</button>
+  
+  <h2>步驟 2: 測試 sessionStorage</h2>
+  <button onclick="testSessionStorage()">測試存儲功能</button>
+  
+  <h2>步驟 3: 測試重定向</h2>
+  <button onclick="testRedirect()">測試跳轉到 admin 頁面</button>
+  
+  <div id="results" style="margin-top: 20px;"></div>
+  
+  <script>
+    document.getElementById('currentOrigin').textContent = window.location.origin;
+    const resultsDiv = document.getElementById('results');
+    
+    function log(message, type = 'info') {
+      const div = document.createElement('div');
+      div.className = `test ${type}`;
+      div.innerHTML = message;
+      resultsDiv.appendChild(div);
+    }
+    
+    async function testLogin() {
+      resultsDiv.innerHTML = '';
+      const userId = document.getElementById('testUserId').value.trim();
+      
+      log(`🔍 測試使用者: ${userId}`, 'info');
+      
+      try {
+        const apiUrl = '/scholarship/api/user/' + encodeURIComponent(userId);
+        log(`📡 API URL: ${apiUrl}`, 'info');
+        
+        const response = await fetch(apiUrl);
+        log(`📥 HTTP Status: ${response.status}`, response.ok ? 'success' : 'error');
+        
+        const result = await response.json();
+        log(`📦 回應資料: <pre>${JSON.stringify(result, null, 2)}</pre>`, 'info');
+        
+        if (result.success) {
+          const user = result.data;
+          log(`✓ 使用者資料載入成功`, 'success');
+          log(`- ID: ${user.id}`, 'info');
+          log(`- 名稱: ${user.name}`, 'info');
+          log(`- 類型: ${user.type}`, 'info');
+          
+          // 測試存儲
+          sessionStorage.setItem('currentUser', JSON.stringify({
+            id: user.id,
+            name: user.name,
+            type: user.type
+          }));
+          log(`✓ sessionStorage 儲存成功`, 'success');
+          
+          // 測試讀取
+          const stored = sessionStorage.getItem('currentUser');
+          if (stored) {
+            log(`✓ sessionStorage 讀取成功: ${stored}`, 'success');
+          } else {
+            log(`✗ sessionStorage 讀取失敗`, 'error');
+          }
+          
+          // 顯示重定向目標
+          const redirects = {
+            Student: 'student_dashboard.html',
+            Teacher: 'teacher.html',
+            SystemAdministrator: 'admin_scholarships.html',
+            Organization: 'organization_applications.html'
+          };
+          const nextPage = redirects[user.type] || 'login.html';
+          log(`🔀 將重定向到: ${nextPage}`, 'info');
+          log(`🔗 完整 URL: ${window.location.origin}/scholarship/pages/${nextPage}`, 'info');
+          
+        } else {
+          log(`✗ API 回應失敗: ${result.message}`, 'error');
+        }
+      } catch (error) {
+        log(`✗ 錯誤: ${error.message}`, 'error');
+        console.error(error);
+      }
+    }
+    
+    function testSessionStorage() {
+      resultsDiv.innerHTML = '';
+      try {
+        sessionStorage.setItem('test', 'value');
+        const val = sessionStorage.getItem('test');
+        sessionStorage.removeItem('test');
+        log(`✓ sessionStorage 功能正常`, 'success');
+      } catch (error) {
+        log(`✗ sessionStorage 不可用: ${error.message}`, 'error');
+      }
+    }
+    
+    function testRedirect() {
+      const user = sessionStorage.getItem('currentUser');
+      if (user) {
+        log(`✓ 找到登入資訊，準備跳轉...`, 'success');
+        setTimeout(() => {
+          window.location.href = 'admin_scholarships.html';
+        }, 1000);
+      } else {
+        log(`✗ 未找到登入資訊，請先執行步驟 1`, 'error');
+      }
+    }
+  </script>
+</body>
+</html>
