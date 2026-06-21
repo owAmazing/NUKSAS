@@ -12,6 +12,13 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use((req, res, next) => {
+  if (req.url.startsWith('/scholarship/api')) {
+    req.url = req.url.replace('/scholarship/api', '/api');
+  }
+  next();
+});
+
 // 中介層設定
 app.use(cors());
 app.use(bodyParser.json());
