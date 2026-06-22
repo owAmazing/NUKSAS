@@ -473,6 +473,26 @@
       if (!currentUser) return;
       loadMessages();
     });
+    // 1. 在 script 裡新增這個安全過濾函數
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // 2. 修改將資料塞入表格（renderAnnouncements）的那段程式碼，改成這樣：
+    // 將原本的 ${content} 改成 ${escapeHtml(content)}
+    `
+      <tr>
+        <td>${a.id}</td>
+        <td><strong>${escapeHtml(a.title)}</strong></td>
+        <td>${new Date(a.created_at).toLocaleDateString('zh-TW')}</td>
+        <td style="max-width:420px; white-space:pre-wrap;">${escapeHtml(a.content)}</td>
+      </tr>
+    `
   </script>
 </body>
 </html>

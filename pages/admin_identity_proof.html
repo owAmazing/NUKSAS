@@ -214,7 +214,19 @@
 
         tbody.innerHTML = rows.map(p => {
           const date    = new Date(p.uploaded_at).toLocaleDateString('zh-TW');
-          const sizeKB  = (p.file_size / 1024).toFixed(1);
+          function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+          }
+
+          // 在渲染表格 rows.map(p => { ... }) 裡面，直接調用：
+          const sizeLabel = formatFileSize(p.file_size);
+
+          // 表格 td 修改成：
+          <td>${sizeLabel}</td>
           const catKey  = p.file_category || 'identity_proof';
           const catLabel = CAT_LABELS[catKey] || catKey;
           const fileMime = p.file_mime || guessMime(p.file_path);
