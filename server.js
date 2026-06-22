@@ -25,6 +25,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('.')); // 提供靜態HTML檔案
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// 相容 XAMPP Apache 路徑（DB 中存的是 /scholarship/uploads/...）
+app.use('/scholarship/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ============================================
 // Multer 設定：佐證檔案上傳（DocumentUploadManager）
@@ -238,6 +240,14 @@ app.post('/api/user', async (req, res) => {
       }
     }
 
+    if (type === 'Teacher') {
+      try {
+        await promisePool.query('INSERT INTO Teacher (id) VALUES (?)', [id]);
+      } catch {
+        // Teacher 記錄可能已存在，忽略
+      }
+    }
+
     sendEmail(email, 'ScholarLink 帳號建立通知', `
       <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px;">
         <h2 style="color:#667eea;margin-top:0;">ScholarLink 帳號已建立</h2>
@@ -368,18 +378,12 @@ app.put('/api/student/:id', async (req, res) => {
     await connection.beginTransaction();
     
     const studentId = req.params.id;
-    const { name, email, identity, major, phones, additionalInfo } = req.body;
+    const { identity, phones, additionalInfo } = req.body;
 
-    // 更新 User 表
+    // 更新 Student 表（name/email 由管理員管控；major 不開放學生修改）
     await connection.query(
-      'UPDATE User SET name = ?, email = ? WHERE id = ?',
-      [name, email, studentId]
-    );
-
-    // 更新 Student 表
-    await connection.query(
-      'UPDATE Student SET identity = ?, major = ? WHERE id = ?',
-      [identity, major, studentId]
+      'UPDATE Student SET identity = ? WHERE id = ?',
+      [identity ?? null, studentId]
     );
 
     // 更新電話號碼（先刪除舊的，再插入新的）
@@ -1516,6 +1520,12 @@ app.post('/api/recommendation', async (req, res) => {
     if (!teacher_id || !application_id || !content) {
       return res.status(400).json({ success: false, message: '缺少必填欄位' });
     }
+
+    // 確保 Teacher 表中有此導師記錄（相容舊帳號）
+    await promisePool.query(
+      'INSERT IGNORE INTO Teacher (id) VALUES (?)',
+      [teacher_id]
+    );
 
     const recommendationId = 'REC' + Date.now();
     await promisePool.query(

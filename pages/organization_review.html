@@ -181,9 +181,10 @@
               <div class="cat-header cat-${cat}">${CAT_LABELS[cat]||cat}（${files.length} 件）</div>
               ${files.map(f => {
                 const fileMime = f.file_mime || guessMime(f.file_path);
+                const displayName = f.file_name || f.file_path.split('/').pop();
                 return `<div class="doc-item">
-                  <span style="color:#e5e7eb;">${f.file_name}</span>
-                  <button class="btn sm-preview" onclick="previewFile('${f.file_path}','${fileMime}','${f.file_name}')">線上預覽</button>
+                  <span style="color:#e5e7eb;">${displayName}</span>
+                  <button class="btn sm-preview" onclick="previewFile('${f.file_path}','${fileMime}','${displayName.replace(/'/g,"\\'")}')">線上預覽</button>
                 </div>`;
               }).join('')}
             </div>`;

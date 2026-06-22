@@ -104,3 +104,10 @@ ALTER TABLE Application
 
 DESCRIBE Application;
 DESCRIBE Scholarship;
+
+-- =============================================
+-- 修復 Teacher 資料表缺漏記錄
+-- 將所有 User.type='Teacher' 補入 Teacher 表（執行一次即可）
+-- =============================================
+INSERT IGNORE INTO Teacher (id)
+SELECT id FROM User WHERE type = 'Teacher';
