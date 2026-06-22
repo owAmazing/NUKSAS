@@ -167,6 +167,32 @@
     .error-msg { background: rgba(244,63,94,0.2); color: #fda4af; }
     .muted { color: var(--muted); font-size: 13px; }
     footer { margin-top: 40px; color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0 40px; }
+    /* Toast 通知 */
+    .toast {
+      position: fixed; bottom: 28px; right: 24px; z-index: 9999;
+      padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 600;
+      font-family: 'Space Grotesk', sans-serif; box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+      display: flex; align-items: center; gap: 10px; max-width: 400px;
+      animation: toastIn 0.28s cubic-bezier(.21,1.02,.73,1) forwards;
+    }
+    .toast.success { background: rgba(34,197,94,0.96); color: #052e16; border: 1px solid rgba(74,222,128,0.5); }
+    .toast.error   { background: rgba(239,68,68,0.95);  color: #fff;    border: 1px solid rgba(252,165,165,0.4); }
+    @keyframes toastIn  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes toastOut { from { opacity:1; transform:translateY(0); }   to { opacity:0; transform:translateY(16px); } }
+    /* 篩選工具列 */
+    .filter-bar { display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin-bottom:16px; }
+    .filter-chips { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .filter-chip {
+      display:inline-flex; align-items:center; gap:6px; padding:5px 12px;
+      border-radius:999px; border:1px solid var(--border); background:var(--surface);
+      font-size:13px; font-weight:600; cursor:pointer; transition:all .15s;
+      color: var(--muted); user-select:none;
+    }
+    .filter-chip input[type="checkbox"] { accent-color: var(--accent-strong); width:14px; height:14px; }
+    .filter-chip:has(input:checked) { border-color:var(--accent-strong); color:var(--accent-strong); background:rgba(34,211,238,0.08); }
+    .filter-search { flex:1; min-width:180px; max-width:300px; }
+    .filter-search input { padding:8px 12px; font-size:13px; }
+    .filter-count { font-size:12px; color:var(--muted); white-space:nowrap; }
     @media (max-width: 720px) {
       .hero h1 { font-size: 24px; }
       nav a { display: none; }
@@ -284,6 +310,22 @@
     <section id="accounts-list" class="card">
       <div class="section-title">現有帳號列表 <span class="pill">System accounts</span></div>
       <div id="list-msg"></div>
+
+      <!-- 篩選工具列 -->
+      <div class="filter-bar">
+        <div class="filter-chips">
+          <span style="font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;">身分篩選：</span>
+          <label class="filter-chip"><input type="checkbox" value="Student" checked onchange="applyFilter()"> 學生</label>
+          <label class="filter-chip"><input type="checkbox" value="Teacher" checked onchange="applyFilter()"> 教師</label>
+          <label class="filter-chip"><input type="checkbox" value="Organization" checked onchange="applyFilter()"> 審查單位</label>
+          <label class="filter-chip"><input type="checkbox" value="SystemAdministrator" checked onchange="applyFilter()"> 管理員</label>
+        </div>
+        <div class="filter-search">
+          <input type="text" id="searchInput" placeholder="搜尋 ID 或姓名…" oninput="applyFilter()" style="width:100%;">
+        </div>
+        <span id="filterCount" class="filter-count"></span>
+      </div>
+
       <div style="overflow-x:auto;">
         <table id="accountsTable">
           <thead>
@@ -333,45 +375,98 @@
       document.getElementById('form-msg').innerHTML            = '';
     }
 
+    // ── Toast 通知 ─────────────────────────────────────────────
+    function showToast(message, type = 'success', duration = 3800) {
+      const old = document.getElementById('_toast');
+      if (old) old.remove();
+      const el = document.createElement('div');
+      el.id = '_toast';
+      el.className = `toast ${type}`;
+      el.textContent = message;
+      document.body.appendChild(el);
+      setTimeout(() => {
+        el.style.animation = 'toastOut 0.28s ease forwards';
+        setTimeout(() => el.remove(), 280);
+      }, duration);
+    }
+
+    // ── 全域帳號快取 ───────────────────────────────────────────
+    let allUsers = [];
+
+    // ── 篩選 + 搜尋聯動邏輯 ────────────────────────────────────
+    function applyFilter() {
+      const checked = Array.from(
+        document.querySelectorAll('.filter-chips input[type="checkbox"]:checked')
+      ).map(cb => cb.value);
+      const kw = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
+
+      const filtered = allUsers.filter(u => {
+        const roleOk = checked.includes(u.type);
+        const kwOk   = !kw || u.id.toLowerCase().includes(kw) || u.name.toLowerCase().includes(kw);
+        return roleOk && kwOk;
+      });
+
+      renderTable(filtered);
+      const countEl = document.getElementById('filterCount');
+      if (countEl) countEl.textContent = `顯示 ${filtered.length} / ${allUsers.length} 筆`;
+    }
+
+    // ── 渲染表格 ───────────────────────────────────────────────
+    const ROLE_LABEL  = { Student:'學生', Teacher:'教師', Organization:'審查單位', SystemAdministrator:'系統管理員' };
+    const ROLE_BADGE  = { Student:'student', Teacher:'teacher', Organization:'organization', SystemAdministrator:'admin' };
+
+    function renderTable(users) {
+      const tbody = document.getElementById('tableBody');
+      if (!users.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--muted); padding:20px;">無符合條件的帳號</td></tr>';
+        return;
+      }
+      tbody.innerHTML = users.map(u => `
+        <tr>
+          <td><strong>${u.id}</strong></td>
+          <td>${u.name}</td>
+          <td><span class="badge ${ROLE_BADGE[u.type] || 'student'}">${ROLE_LABEL[u.type] || u.type}</span></td>
+          <td><small style="color:var(--muted);">${u.department || '—'}</small></td>
+          <td><small>${u.email}</small></td>
+          <td>
+            <button class="btn danger" style="padding:6px 10px; font-size:12px;"
+              onclick="deleteAccount('${u.id}')">刪除</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
     // ── 新增帳號 ───────────────────────────────────────────────
     document.getElementById('accountForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const msgDiv = document.getElementById('form-msg');
       msgDiv.innerHTML = '';
 
-      const id       = document.getElementById('accountId').value.trim();
-      const name     = document.getElementById('accountName').value.trim();
-      const email    = document.getElementById('accountEmail').value.trim();
-      const type     = document.getElementById('accountType').value;
-      const password = document.getElementById('accountPassword').value;
+      const id              = document.getElementById('accountId').value.trim();
+      const name            = document.getElementById('accountName').value.trim();
+      const email           = document.getElementById('accountEmail').value.trim();
+      const type            = document.getElementById('accountType').value;
+      const password        = document.getElementById('accountPassword').value;
       const passwordConfirm = document.getElementById('accountPasswordConfirm').value;
-      const department = ['Student', 'Teacher'].includes(type)
-        ? document.getElementById('accountDepartment').value
-        : null;
+      const department      = ['Student', 'Teacher'].includes(type)
+        ? document.getElementById('accountDepartment').value : null;
 
-      // 密碼長度驗證
       if (password.length < 6) {
-        msgDiv.innerHTML = `<div class="error-msg">❌ 密碼至少需要 6 個字元</div>`;
-        return;
+        msgDiv.innerHTML = `<div class="error-msg">❌ 密碼至少需要 6 個字元</div>`; return;
       }
-
-      // 密碼確認比對
       if (password !== passwordConfirm) {
-        msgDiv.innerHTML = `<div class="error-msg">❌ 兩次輸入的密碼不一致</div>`;
-        return;
+        msgDiv.innerHTML = `<div class="error-msg">❌ 兩次輸入的密碼不一致</div>`; return;
       }
-
-      // 學生/教師必須選擇科系
       if (['Student', 'Teacher'].includes(type) && !department) {
-        msgDiv.innerHTML = `<div class="error-msg">❌ 請選擇所屬科系</div>`;
-        return;
+        msgDiv.innerHTML = `<div class="error-msg">❌ 請選擇所屬科系</div>`; return;
+      }
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        msgDiv.innerHTML = `<div class="error-msg">❌ Email 格式不正確</div>`; return;
       }
 
-      // 基本 Email 格式驗證（任意網域）
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-        msgDiv.innerHTML = `<div class="error-msg">❌ Email 格式不正確</div>`;
-        return;
-      }
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '新增中…';
 
       try {
         const response = await fetch(`${API_BASE}/user`, {
@@ -379,98 +474,55 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id, name, email, type, department, password })
         });
-
         const data = await response.json();
 
         if (!response.ok || !data.success) {
           msgDiv.innerHTML = `<div class="error-msg">❌ ${data.message || '新增失敗'}</div>`;
         } else {
-          const deptText = data.data.department ? `，科系：${data.data.department}` : '';
-          msgDiv.innerHTML = `<div class="success-msg">✓ 帳號已新增成功（預設密碼：${data.data.tempPassword}${deptText}）</div>`;
+          const deptText = data.data?.department ? `　科系：${data.data.department}` : '';
+          const pwText   = data.data?.tempPassword ? `　初始密碼：${data.data.tempPassword}` : '';
+          showToast(`✓ 帳號 ${id} 新增成功${pwText}${deptText}`);
+          msgDiv.innerHTML = '';
           document.getElementById('accountForm').reset();
           onFormReset();
-          setTimeout(() => { msgDiv.innerHTML = ''; loadAccounts(); }, 2500);
+          await loadAccounts();
         }
       } catch (err) {
         msgDiv.innerHTML = `<div class="error-msg">❌ ${err.message}</div>`;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '新增帳號';
       }
     });
 
-    // 角色對應中文
-    function getRoleLabel(type) {
-      const labels = {
-        'Student': '學生',
-        'Teacher': '教師',
-        'Organization': '審查單位',
-        'SystemAdministrator': '系統管理員'
-      };
-      return labels[type] || type;
-    }
-
-    // 獲取角色徽章
-    function getRoleBadge(type) {
-      const badges = {
-        'Student': 'student',
-        'Teacher': 'teacher',
-        'Organization': 'organization',
-        'SystemAdministrator': 'admin'
-      };
-      return badges[type] || 'student';
-    }
-
-    // 載入帳號列表
+    // ── 載入帳號列表 ───────────────────────────────────────────
     async function loadAccounts() {
       const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px;">載入中…</td></tr>';
       try {
         const response = await fetch(`${API_BASE}/users`);
         const data = await response.json();
-        
         if (!response.ok || !data.users) {
-          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--muted);">無法載入帳號</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);">無法載入帳號</td></tr>';
           return;
         }
-
-        if (data.users.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--muted);">暫無帳號</td></tr>';
-          return;
-        }
-
-        tbody.innerHTML = data.users.map(user => `
-          <tr>
-            <td><strong>${user.id}</strong></td>
-            <td>${user.name}</td>
-            <td><span class="badge ${getRoleBadge(user.type)}">${getRoleLabel(user.type)}</span></td>
-            <td><small style="color:var(--muted);">${user.department || '—'}</small></td>
-            <td><small>${user.email}</small></td>
-            <td>
-              <button class="btn danger" style="padding:6px 10px; font-size:12px;" onclick="deleteAccount('${user.id}')">刪除</button>
-            </td>
-          </tr>
-        `).join('');
+        allUsers = data.users;
+        applyFilter();
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="5" style="color: var(--text);">❌ ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="color:var(--text);">❌ ${err.message}</td></tr>`;
       }
     }
 
-    // 刪除帳號
+    // ── 刪除帳號 ───────────────────────────────────────────────
     function deleteAccount(userId) {
-      if (!confirm(`確定要刪除帳號 ${userId} 嗎？此動作無法復原。`)) {
-        return;
-      }
-      
-      fetch(`${API_BASE}/user/${userId}`, {
-        method: 'DELETE'
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          alert('帳號已刪除');
-          loadAccounts();
-        } else {
-          alert(`刪除失敗：${data.message}`);
-        }
-      })
-      .catch(err => alert(`錯誤：${err.message}`));
+      if (!confirm(`確定要刪除帳號 ${userId} 嗎？此動作無法復原。`)) return;
+      fetch(`${API_BASE}/user/${userId}`, { method: 'DELETE' })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) { showToast(`帳號 ${userId} 已刪除`); loadAccounts(); }
+          else showToast(`刪除失敗：${data.message}`, 'error');
+        })
+        .catch(err => showToast(`錯誤：${err.message}`, 'error'));
     }
 
     // 頁面載入時取得帳號列表

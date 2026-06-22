@@ -175,7 +175,8 @@
         <form id="studentForm">
           <div>
             <label>姓名</label>
-            <input type="text" id="name" name="name" required>
+            <input type="text" id="name" name="name" disabled style="opacity:0.65; cursor:not-allowed;">
+            <p class="muted" style="margin-top:4px;">* 姓名為系統同步資料，如需修改請洽教務處</p>
           </div>
           <div>
             <label>學號</label>
@@ -184,7 +185,8 @@
           </div>
           <div>
             <label>Email</label>
-            <input type="email" id="email" name="email" required>
+            <input type="email" id="email" name="email" disabled style="opacity:0.65; cursor:not-allowed;">
+            <p class="muted" style="margin-top:4px;">* Email 為系統同步資料，如需修改請洽教務處</p>
           </div>
           <div>
             <label>聯絡電話（可多筆）</label>
@@ -592,17 +594,8 @@
         .map(input => input.value.trim())
         .filter(phone => phone !== ''); // 過濾空白電話
 
-      const name = (formData.get('name') || '').trim();
-      const email = (formData.get('email') || '').trim();
-      // 基本 Email 格式驗證（任意網域）
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-        showError('Email 格式不正確');
-        return;
-      }
-
+      // name/email 為唯讀欄位，後端亦不接受修改
       const data = {
-        name,
-        email,
         identity: formData.get('identity'),
         phones: phones,
         additionalInfo: null

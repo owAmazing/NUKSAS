@@ -1,4 +1,6 @@
 ﻿<?php
+// 關閉 HTML 錯誤輸出，防止 PHP warning/notice 混入 JSON response body
+ini_set('display_errors', 0);
 // 資料庫連接設定
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -279,19 +281,16 @@ else if ($method === 'PUT' && $segments[0] === 'student' && isset($segments[1]))
     try {
         $pdo->beginTransaction();
 
-        // 更新 User 表
-        $stmt = $pdo->prepare("UPDATE User SET name = ?, email = ? WHERE id = ?");
-        $stmt->execute([$data['name'], $data['email'], $studentId]);
-
-        // 更新 Student 表
-        $stmt = $pdo->prepare("UPDATE Student SET identity = ?, major = ? WHERE id = ?");
-        $stmt->execute([$data['identity'], $data['major'], $studentId]);
+        // 更新 Student 表（name/email 由管理員管控，學生不可修改；major 不開放學生自行修改）
+        $identity = $data['identity'] ?? null;
+        $stmt = $pdo->prepare("UPDATE Student SET identity = ? WHERE id = ?");
+        $stmt->execute([$identity, $studentId]);
 
         // 更新電話號碼
         $stmt = $pdo->prepare("DELETE FROM User_Phone WHERE user_id = ?");
         $stmt->execute([$studentId]);
-        
-        if (isset($data['phones']) && is_array($data['phones'])) {
+
+        if (!empty($data['phones']) && is_array($data['phones'])) {
             $stmt = $pdo->prepare("INSERT INTO User_Phone (user_id, phone) VALUES (?, ?)");
             foreach ($data['phones'] as $phone) {
                 if (trim($phone)) {
@@ -301,7 +300,7 @@ else if ($method === 'PUT' && $segments[0] === 'student' && isset($segments[1]))
         }
 
         // 更新僑生資訊
-        if ($data['identity'] === '僑生' && isset($data['additionalInfo'])) {
+        if ($identity === '僑生' && isset($data['additionalInfo'])) {
             $info = $data['additionalInfo'];
             
             $stmt = $pdo->prepare("SELECT id FROM Overseas_Student WHERE id = ?");
@@ -410,23 +409,32 @@ else if ($method === 'POST' && $segments[0] === 'recommendation' && !isset($segm
     
     try {
         $recommendationId = 'REC' . time();
-        
+        $teacherId = $data['teacher_id'] ?? '';
+
+        // 確保 Teacher 表中有此導師記錄（相容舊帳號，避免 FK 約束失敗）
+        $stmt = $pdo->prepare("INSERT IGNORE INTO Teacher (id) VALUES (?)");
+        $stmt->execute([$teacherId]);
+
         $stmt = $pdo->prepare("
             INSERT INTO Recommendation (id, content, teacher_id, update_date)
             VALUES (?, ?, ?, NOW())
         ");
         $stmt->execute([
             $recommendationId,
-            isset($data['content']) ? $data['content'] : '',
-            $data['teacher_id']
+            $data['content'] ?? '',
+            $teacherId
         ]);
-        
-        // 更新申請的推薦信ID
+
+        // 更新申請：同步推進至 pending_review 狀態
         if (isset($data['application_id'])) {
-            $stmt = $pdo->prepare("UPDATE Application SET recommendation_id = ? WHERE id = ?");
+            $stmt = $pdo->prepare("
+                UPDATE Application
+                SET recommendation_id = ?, apply_state = 'pending_review'
+                WHERE id = ? AND apply_state = 'pending_tutor'
+            ");
             $stmt->execute([$recommendationId, $data['application_id']]);
         }
-        
+
         echo json_encode(['success' => true, 'data' => ['id' => $recommendationId]]);
     } catch(PDOException $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
@@ -584,7 +592,7 @@ else if ($method === 'GET' && $segments[0] === 'organization' && isset($segments
 }
 
 // 路由: GET /applications/{studentId}
-else if ($method === 'GET' && $segments[0] === 'applications' && isset($segments[1])) {
+else if ($method === 'GET' && $segments[0] === 'applications' && isset($segments[1]) && !isset($segments[2])) {
     $studentId = $segments[1];
 
     try {
@@ -2340,4 +2348,5 @@ else {
     http_response_code(404);
     echo json_encode(['success' => false, 'message' => 'API 路由不存在', 'path' => implode('/', $segments)]);
 }
+
 ?>
