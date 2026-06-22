@@ -260,7 +260,14 @@
       const gpa = parseFloat(document.getElementById('gpa').value);
       const score = parseFloat(document.getElementById('score').value);
       const requiresRecommendation = document.getElementById('requiresRecommendation').checked;
-
+      if (isNaN(gpa) || gpa < 0 || gpa > 4.3) {
+        alert('❌ 錯誤：GPA 必須介於 0 到 4.3 之間！');
+        return; // 成功攔截，不讓程式繼續往下跑 fetch
+      }
+      if (isNaN(score) || score < 0 || score > 100) {
+        alert('❌ 錯誤：學期成績必須介於 0 到 100 之間！');
+        return; // 成功攔截
+      }
       if (!scholarshipName || scholarshipName === '請從獎學金列表選擇申請') {
         alert('請先選擇要申請的獎學金');
         return;
